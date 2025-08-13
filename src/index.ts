@@ -1,0 +1,49 @@
+import { Countdown, Timeline } from './timers.js';
+
+const timeline = new Timeline([
+  new Countdown(10, 'Prepare for quads stretch'),
+  new Countdown(30, 'Quads stretch for {{remains}} seconds'),
+  new Countdown(3, 'Switch legs'),
+  new Countdown(30, 'Quads stretch for {{remains}} seconds'),
+
+  new Countdown(5, 'Prepare for calf stretch'),
+  new Countdown(30, 'Calf stretch for {{remains}} seconds'),
+  new Countdown(3, 'Switch legs'),
+  new Countdown(30, 'Calf stretch for {{remains}} seconds'),
+
+  new Countdown(15, 'Prepare for shin stretch'),
+  new Countdown(60, 'Shin stretch for {{remains}} seconds'),
+
+  new Countdown(15, 'Prepare for hip flexor stretch'),
+  new Countdown(45, 'Hip flexor stretch for {{remains}} seconds'),
+  new Countdown(15, 'Switch legs'),
+  new Countdown(45, 'Hip flexor stretch for {{remains}} seconds'),
+
+  new Countdown(15, 'Prepare for pigeon stretch'),
+  new Countdown(45, 'Pigeon stretch for {{remains}} seconds'),
+  new Countdown(15, 'Switch legs'),
+  new Countdown(45, 'Pigeon stretch for {{remains}} seconds'),
+
+  new Countdown(15, 'Prepare for seated forward bend'),
+  new Countdown(45, 'Seated forward bend for {{remains}} seconds'),
+
+  new Countdown(15, 'Prepare for butterfly stretch'),
+  new Countdown(60, 'Butterfly stretch for {{remains}} seconds'),
+
+  new Countdown(15, 'Prepare for figure four stretch'),
+  new Countdown(30, 'Figure four stretch for {{remains}} seconds'),
+  new Countdown(5, 'Switch legs'),
+  new Countdown(30, 'Figure four stretch for {{remains}} seconds'),
+
+  new Countdown(15, 'Prepare for lower back stretch'),
+  new Countdown(30, 'Lower back stretch for {{remains}} seconds'),
+  new Countdown(5, 'Switch sides'),
+  new Countdown(30, 'Lower back stretch for {{remains}} seconds'),
+  new Countdown(60, 'Cool down and relax'),
+  new Countdown(20, 'Get ready for meditation'),
+  new Countdown(60 * 5, 'Meditation time! Relax and breathe deeply', 'Congratulations! You have completed the stretching morning routine!'),
+]);
+
+document.querySelector('#startButton')!.addEventListener('click', () => {
+  timeline.run();
+});
