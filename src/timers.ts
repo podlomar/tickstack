@@ -124,3 +124,40 @@ export class Timeline {
     }
   }
 }
+
+export class Timer {
+  private duration: number;
+
+  public onTick: (remaining: number) => void = () => { };
+  public onFrame: (remaining: number) => void = () => { };
+
+  public constructor(duration: number) {
+    this.duration = duration;
+  }
+
+  public async run(): Promise<void> {
+    const startTime = performance.now();
+    let lastTickTime = startTime;
+
+    return new Promise((resolve) => {
+      const update = (time: number): void => {
+        const runningTime = time - startTime;
+        const remainingTime = this.duration - runningTime;
+        this.onFrame(remainingTime);
+
+        if (remainingTime <= 0) {
+          this.onTick(0);
+          resolve();
+          return;
+        }
+
+        if (time - lastTickTime >= 1000) {
+          this.onTick(remainingTime);
+          lastTickTime = time;
+        }
+      };
+
+      window.requestAnimationFrame(update);
+    });
+  }
+};

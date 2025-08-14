@@ -85,3 +85,33 @@ export class Timeline {
         }
     }
 }
+export class Timer {
+    duration;
+    onTick = () => { };
+    onFrame = () => { };
+    constructor(duration) {
+        this.duration = duration;
+    }
+    async run() {
+        const startTime = performance.now();
+        let lastTickTime = startTime;
+        return new Promise((resolve) => {
+            const update = (time) => {
+                const runningTime = time - startTime;
+                const remainingTime = this.duration - runningTime;
+                this.onFrame(remainingTime);
+                if (remainingTime <= 0) {
+                    this.onTick(0);
+                    resolve();
+                    return;
+                }
+                if (time - lastTickTime >= 1000) {
+                    this.onTick(remainingTime);
+                    lastTickTime = time;
+                }
+            };
+            window.requestAnimationFrame(update);
+        });
+    }
+}
+;
