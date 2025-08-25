@@ -6,67 +6,55 @@ const template = (str: string, args: { [key: string]: any }) => {
 };
 
 interface TimelineElement {
-  start(): Promise<void>;
-  tick(): 'continue' | 'stop';
-  finish(): Promise<void>;
-  isRunning(): boolean;
+  run(): Promise<void>;
+  getDuration(): number;
 }
 
 export class Countdown implements TimelineElement {
   private startPhrase: string;
   private endPhrase?: string;
-  private duration: number;
-  private remaining: number;
-  private running: boolean = false;
+  private timer: Timer;
 
   public constructor(
     duration: number,
     startPhrase: string,
     endPhrase?: string,
   ) {
-    this.duration = duration;
-    this.remaining = duration;
+    this.timer = new Timer(duration);
+    this.timer.onTick = this.handleTick.bind(this);
+    this.timer.onFinish = this.handleFinish.bind(this);
     this.startPhrase = startPhrase;
     this.endPhrase = endPhrase;
   }
 
-  public async start(): Promise<void> {
-    this.remaining = this.duration;
+  public async run(): Promise<void> {
     const countdownElement = document.getElementById('countdown')!;
-    countdownElement.textContent = template(this.startPhrase, { remains: this.remaining });
+    countdownElement.textContent = template(this.startPhrase, { remains: this.timer.getRemaining() });
 
     const utterStart = new SpeechSynthesisUtterance(
-      template(this.startPhrase, { remains: this.remaining })
+      template(this.startPhrase, { remains: this.timer.getRemaining() })
     );
     window.speechSynthesis.speak(utterStart);
 
     return new Promise((resolve) => {
-      utterStart.onend = () => {
-        this.running = true;
+      utterStart.onend = async () => {
+        await this.timer.run();
         resolve();
       };
     });
   }
 
-  public tick(): 'continue' | 'stop' {
-    if (!this.running) {
-      return 'stop';
-    }
-
-    this.remaining -= 1;
-
-    const countdownElement = document.getElementById('countdown')!;
-    countdownElement.textContent = `${this.remaining} seconds`;
-
-    if (this.remaining <= 0) {
-      return 'stop';
-    }
-
-    return 'continue';
+  public getDuration(): number {
+    return this.timer.getDuration();
   }
 
-  public async finish(): Promise<void> {
-    this.running = false;
+  private handleTick(remaining: number): void {
+    console.log(`Remaining time: ${remaining} ms`);
+    const countdownElement = document.getElementById('countdown')!;
+    countdownElement.textContent = template(this.startPhrase, { remains: remaining });
+  }
+
+  private handleFinish(): void {
     const countdownElement = document.getElementById('countdown')!;
     countdownElement.textContent = template(this.endPhrase ?? '0', { remains: 0 });
 
@@ -75,43 +63,20 @@ export class Countdown implements TimelineElement {
         template(this.endPhrase, { remains: 0 })
       );
       window.speechSynthesis.speak(utterFinish);
-
-      return new Promise((resolve) => {
-        utterFinish.onend = () => {
-          resolve();
-        };
-      });
     }
-
-    return;
-  }
-
-  public isRunning(): boolean {
-    return this.running;
   }
 }
 
 export class Timeline {
   private elements: TimelineElement[] = [];
   private currentIndex: number = 0;
+  private totalDuration: number = 0;
 
   public constructor(elements: TimelineElement[]) {
     this.elements = elements;
-  }
-
-  public async runElement(element: TimelineElement): Promise<void> {
-    await element.start();
-
-    return new Promise((resolve) => {
-      const intervalId = setInterval(async () => {
-        const action = element.tick();
-        if (action === 'stop') {
-          clearInterval(intervalId);
-          await element.finish();
-          resolve();
-        }
-      }, 1000);
-    });
+    this.totalDuration = elements.reduce((sum, element) => {
+      return sum + element.getDuration();
+    }, 0);
   }
 
   public async run(): Promise<void> {
@@ -119,45 +84,62 @@ export class Timeline {
 
     while (this.currentIndex < this.elements.length) {
       const element = this.elements[this.currentIndex];
-      await this.runElement(element);
+      await element.run();
       this.currentIndex++;
     }
+  }
+
+  public getTotalDuration(): number {
+    return this.totalDuration;
   }
 }
 
 export class Timer {
   private duration: number;
+  private remaining: number;
 
   public onTick: (remaining: number) => void = () => { };
   public onFrame: (remaining: number) => void = () => { };
+  public onFinish: () => void = () => { };
 
   public constructor(duration: number) {
     this.duration = duration;
+    this.remaining = duration;
   }
 
   public async run(): Promise<void> {
-    const startTime = performance.now();
+    const startTime = performance.now() / 1000;
     let lastTickTime = startTime;
 
     return new Promise((resolve) => {
       const update = (time: number): void => {
-        const runningTime = time - startTime;
-        const remainingTime = this.duration - runningTime;
-        this.onFrame(remainingTime);
+        const runningTime = time / 1000 - startTime;
+        this.remaining = this.duration - runningTime;
+        this.onFrame(this.remaining);
 
-        if (remainingTime <= 0) {
-          this.onTick(0);
+        if (this.remaining <= 0) {
+          this.onFinish();
           resolve();
           return;
         }
 
         if (time - lastTickTime >= 1000) {
-          this.onTick(remainingTime);
+          this.onTick(this.remaining);
           lastTickTime = time;
         }
+
+        window.requestAnimationFrame(update);
       };
 
       window.requestAnimationFrame(update);
     });
+  }
+
+  public getDuration(): number {
+    return this.duration;
+  }
+
+  public getRemaining(): number {
+    return this.remaining;
   }
 };
