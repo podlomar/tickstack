@@ -46,6 +46,45 @@ export class Countdown {
         }
     }
 }
+export class Stopwatch {
+    timer;
+    startPhrase;
+    endPhrase;
+    constructor(startPhrase, endPhrase) {
+        this.timer = new Timer();
+        this.timer.onFrame = this.handleFrame.bind(this);
+        this.startPhrase = startPhrase;
+        this.endPhrase = endPhrase;
+    }
+    async run() {
+        const countdownElement = document.getElementById('countdown');
+        countdownElement.textContent = this.startPhrase;
+        const utterStart = new SpeechSynthesisUtterance(this.startPhrase);
+        window.speechSynthesis.speak(utterStart);
+        return new Promise((resolve) => {
+            utterStart.onend = async () => {
+                await this.timer.run();
+                resolve();
+            };
+        });
+    }
+    stop() {
+        this.timer.stop();
+        const countdownElement = document.getElementById('countdown');
+        countdownElement.textContent = '00:00';
+    }
+    getDuration() {
+        return null;
+    }
+    handleFrame(elapsed) {
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = Math.floor(elapsed % 60);
+        const countdownElement = document.getElementById('countdown');
+        countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds
+            .toString()
+            .padStart(2, '0')}`;
+    }
+}
 export class Timeline {
     elements = [];
     currentIndex = 0;
@@ -66,6 +105,11 @@ export class Timeline {
     }
     getTotalDuration() {
         return this.totalDuration;
+    }
+    next() {
+        if (this.currentIndex < this.elements.length) {
+            this.elements[this.currentIndex].stop();
+        }
     }
 }
 export class Timer {

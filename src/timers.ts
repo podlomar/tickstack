@@ -74,6 +74,52 @@ export class Countdown implements TimelineElement {
   }
 }
 
+export class Stopwatch implements TimelineElement {
+  private timer: Timer;
+  private startPhrase: string;
+  private endPhrase?: string;
+
+  public constructor(startPhrase: string, endPhrase?: string) {
+    this.timer = new Timer();
+    this.timer.onFrame = this.handleFrame.bind(this);
+    this.startPhrase = startPhrase;
+    this.endPhrase = endPhrase;
+  }
+
+  public async run(): Promise<void> {
+    const countdownElement = document.getElementById('countdown')!;
+    countdownElement.textContent = this.startPhrase;
+    const utterStart = new SpeechSynthesisUtterance(this.startPhrase);
+    window.speechSynthesis.speak(utterStart);
+
+    return new Promise((resolve) => {
+      utterStart.onend = async () => {
+        await this.timer.run();
+        resolve();
+      };
+    });
+  }
+
+  public stop(): void {
+    this.timer.stop();
+    const countdownElement = document.getElementById('countdown')!;
+    countdownElement.textContent = '00:00';
+  }
+
+  public getDuration(): number | null {
+    return null;
+  }
+
+  private handleFrame(elapsed: number): void {
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = Math.floor(elapsed % 60);
+    const countdownElement = document.getElementById('countdown')!;
+    countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`;
+  }
+}
+
 export class Timeline {
   private elements: TimelineElement[] = [];
   private currentIndex: number = 0;
@@ -98,6 +144,12 @@ export class Timeline {
 
   public getTotalDuration(): number {
     return this.totalDuration;
+  }
+
+  public next(): void {
+    if (this.currentIndex < this.elements.length) {
+      this.elements[this.currentIndex].stop();
+    }
   }
 }
 

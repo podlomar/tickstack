@@ -1,6 +1,6 @@
-import { Countdown, Timeline } from './timers.js';
+import { Countdown, Stopwatch, Timeline } from './timers.js';
 
-const timeline = new Timeline([
+const stretching = new Timeline([
   new Countdown(10, 'Prepare for quads stretch'),
   new Countdown(30, 'Quads stretch for {{remains}} seconds'),
   new Countdown(5, 'Switch legs'),
@@ -52,9 +52,43 @@ const timeline = new Timeline([
   new Countdown(60 * 7, 'Meditation time for 7 minutes! Relax and breathe deeply', 'Congratulations! You have completed the stretching morning routine!'),
 ]);
 
-document.querySelector('#startButton')!.addEventListener('click', () => {
-  timeline.run();
+const wednesday = new Timeline([
+  new Countdown(10, 'Prepare for squats'),
+  new Stopwatch('Squats set 1'),
+  new Countdown(60, 'Rest for {{remains}} seconds'),
+  new Stopwatch('Squats set 2'),
+  new Countdown(60, 'Rest for {{remains}} seconds'),
+  new Stopwatch('Squats set 3'),
+  new Countdown(60, 'Relax and prepare for next exercise'),
+  new Countdown(15, 'Prepare for glute bridges'),
+  new Countdown(50, 'Glute bridge for {{remains}} seconds'),
+  new Countdown(50, 'Rest for {{remains}} seconds'),
+  new Countdown(50, 'Glute bridge for {{remains}} seconds'),
+  new Countdown(50, 'Rest for {{remains}} seconds'),
+  new Countdown(50, 'Glute bridge for {{remains}} seconds', 'Great job! You have completed the morning workout!'),
+]);
+
+let timeline: Timeline | null = null;
+
+document.querySelector('#startStretching')!.addEventListener('click', () => {
+  stretching.run();
+  timeline = stretching;
 });
+
+document.querySelector('#startWednesday')!.addEventListener('click', () => {
+  wednesday.run();
+  timeline = wednesday;
+});
+
+document.querySelector('#nextButton')!.addEventListener('click', () => {
+  timeline?.next();
+});
+
+window.onkeyup = (e) => {
+  if (e.code === 'Space') {
+    timeline?.next();
+  }
+};
 
 const formatDuration = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
@@ -62,4 +96,4 @@ const formatDuration = (seconds: number): string => {
   return `${minutes} min ${secs} sec`;
 };
 
-document.querySelector('#total-duration')!.textContent = `Total Duration: ${formatDuration(timeline.getTotalDuration())}`;
+document.querySelector('#total-duration')!.textContent = `Total Duration: ${formatDuration(stretching.getTotalDuration())}`;
