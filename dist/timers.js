@@ -1,7 +1,7 @@
 const template = (str, args) => {
     return str.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (_, key) => args[key]);
 };
-export class Countdown {
+export class Counter {
     duration;
     startPhrase;
     endPhrase;
@@ -38,51 +38,12 @@ export class Countdown {
         return this.duration;
     }
     handleTick(elapsed) {
-        const remaining = this.duration - elapsed;
+        const displayTime = this.duration === 'stopwatch' ? elapsed : this.duration - elapsed;
         const countdownElement = document.getElementById('countdown');
-        countdownElement.textContent = template(this.startPhrase, { remains: remaining });
-        if (remaining <= 0) {
+        countdownElement.textContent = template(this.startPhrase, { remains: displayTime });
+        if (this.duration !== 'stopwatch' && elapsed >= this.duration) {
             this.stop();
         }
-    }
-}
-export class Stopwatch {
-    timer;
-    startPhrase;
-    endPhrase;
-    constructor(startPhrase, endPhrase) {
-        this.timer = new Timer();
-        this.timer.onFrame = this.handleFrame.bind(this);
-        this.startPhrase = startPhrase;
-        this.endPhrase = endPhrase;
-    }
-    async run() {
-        const countdownElement = document.getElementById('countdown');
-        countdownElement.textContent = this.startPhrase;
-        const utterStart = new SpeechSynthesisUtterance(this.startPhrase);
-        window.speechSynthesis.speak(utterStart);
-        return new Promise((resolve) => {
-            utterStart.onend = async () => {
-                await this.timer.run();
-                resolve();
-            };
-        });
-    }
-    stop() {
-        this.timer.stop();
-        const countdownElement = document.getElementById('countdown');
-        countdownElement.textContent = '00:00';
-    }
-    getDuration() {
-        return null;
-    }
-    handleFrame(elapsed) {
-        const minutes = Math.floor(elapsed / 60);
-        const seconds = Math.floor(elapsed % 60);
-        const countdownElement = document.getElementById('countdown');
-        countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds
-            .toString()
-            .padStart(2, '0')}`;
     }
 }
 export class Timeline {
@@ -92,7 +53,8 @@ export class Timeline {
     constructor(elements) {
         this.elements = elements;
         this.totalDuration = elements.reduce((sum, element) => {
-            return sum + (element.getDuration() ?? 0);
+            const duration = element.getDuration();
+            return sum + (duration === 'stopwatch' ? 0 : duration);
         }, 0);
     }
     async run() {

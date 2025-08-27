@@ -5,20 +5,22 @@ const template = (str: string, args: { [key: string]: any }) => {
   );
 };
 
+type Duration = number | 'stopwatch';
+
 interface TimelineElement {
   run(): Promise<void>;
   stop(): void;
-  getDuration(): number | null;
+  getDuration(): Duration;
 }
 
-export class Countdown implements TimelineElement {
-  private duration: number;
+export class Counter implements TimelineElement {
+  private duration: Duration;
   private startPhrase: string;
   private endPhrase?: string;
   private timer: Timer;
 
   public constructor(
-    duration: number,
+    duration: Duration,
     startPhrase: string,
     endPhrase?: string,
   ) {
@@ -59,64 +61,18 @@ export class Countdown implements TimelineElement {
     }
   }
 
-  public getDuration(): number {
+  public getDuration(): Duration {
     return this.duration;
   }
 
   private handleTick(elapsed: number): void {
-    const remaining = this.duration - elapsed;
+    const displayTime = this.duration === 'stopwatch' ? elapsed : this.duration - elapsed;
     const countdownElement = document.getElementById('countdown')!;
-    countdownElement.textContent = template(this.startPhrase, { remains: remaining });
+    countdownElement.textContent = template(this.startPhrase, { remains: displayTime });
 
-    if (remaining <= 0) {
+    if (this.duration !== 'stopwatch' && elapsed >= this.duration) {
       this.stop();
     }
-  }
-}
-
-export class Stopwatch implements TimelineElement {
-  private timer: Timer;
-  private startPhrase: string;
-  private endPhrase?: string;
-
-  public constructor(startPhrase: string, endPhrase?: string) {
-    this.timer = new Timer();
-    this.timer.onFrame = this.handleFrame.bind(this);
-    this.startPhrase = startPhrase;
-    this.endPhrase = endPhrase;
-  }
-
-  public async run(): Promise<void> {
-    const countdownElement = document.getElementById('countdown')!;
-    countdownElement.textContent = this.startPhrase;
-    const utterStart = new SpeechSynthesisUtterance(this.startPhrase);
-    window.speechSynthesis.speak(utterStart);
-
-    return new Promise((resolve) => {
-      utterStart.onend = async () => {
-        await this.timer.run();
-        resolve();
-      };
-    });
-  }
-
-  public stop(): void {
-    this.timer.stop();
-    const countdownElement = document.getElementById('countdown')!;
-    countdownElement.textContent = '00:00';
-  }
-
-  public getDuration(): number | null {
-    return null;
-  }
-
-  private handleFrame(elapsed: number): void {
-    const minutes = Math.floor(elapsed / 60);
-    const seconds = Math.floor(elapsed % 60);
-    const countdownElement = document.getElementById('countdown')!;
-    countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds
-      .toString()
-      .padStart(2, '0')}`;
   }
 }
 
@@ -128,7 +84,8 @@ export class Timeline {
   public constructor(elements: TimelineElement[]) {
     this.elements = elements;
     this.totalDuration = elements.reduce((sum, element) => {
-      return sum + (element.getDuration() ?? 0);
+      const duration = element.getDuration();
+      return sum + (duration === 'stopwatch' ? 0 : duration);
     }, 0);
   }
 
