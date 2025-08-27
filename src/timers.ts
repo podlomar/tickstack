@@ -7,10 +7,12 @@ const template = (str: string, args: { [key: string]: any }) => {
 
 interface TimelineElement {
   run(): Promise<void>;
-  getDuration(): number;
+  stop(): void;
+  getDuration(): number | null;
 }
 
 export class Countdown implements TimelineElement {
+  private duration: number;
   private startPhrase: string;
   private endPhrase?: string;
   private timer: Timer;
@@ -20,19 +22,19 @@ export class Countdown implements TimelineElement {
     startPhrase: string,
     endPhrase?: string,
   ) {
-    this.timer = new Timer(duration);
+    this.duration = duration;
+    this.timer = new Timer();
     this.timer.onTick = this.handleTick.bind(this);
-    this.timer.onFinish = this.handleFinish.bind(this);
     this.startPhrase = startPhrase;
     this.endPhrase = endPhrase;
   }
 
   public async run(): Promise<void> {
     const countdownElement = document.getElementById('countdown')!;
-    countdownElement.textContent = template(this.startPhrase, { remains: this.timer.getRemaining() });
+    countdownElement.textContent = template(this.startPhrase, { remains: this.duration });
 
     const utterStart = new SpeechSynthesisUtterance(
-      template(this.startPhrase, { remains: this.timer.getRemaining() })
+      template(this.startPhrase, { remains: this.duration })
     );
     window.speechSynthesis.speak(utterStart);
 
@@ -44,17 +46,8 @@ export class Countdown implements TimelineElement {
     });
   }
 
-  public getDuration(): number {
-    return this.timer.getDuration();
-  }
-
-  private handleTick(remaining: number): void {
-    console.log(`Remaining time: ${remaining} ms`);
-    const countdownElement = document.getElementById('countdown')!;
-    countdownElement.textContent = template(this.startPhrase, { remains: remaining });
-  }
-
-  private handleFinish(): void {
+  public stop(): void {
+    this.timer.stop();
     const countdownElement = document.getElementById('countdown')!;
     countdownElement.textContent = template(this.endPhrase ?? '0', { remains: 0 });
 
@@ -63,6 +56,20 @@ export class Countdown implements TimelineElement {
         template(this.endPhrase, { remains: 0 })
       );
       window.speechSynthesis.speak(utterFinish);
+    }
+  }
+
+  public getDuration(): number {
+    return this.duration;
+  }
+
+  private handleTick(elapsed: number): void {
+    const remaining = this.duration - elapsed;
+    const countdownElement = document.getElementById('countdown')!;
+    countdownElement.textContent = template(this.startPhrase, { remains: remaining });
+
+    if (remaining <= 0) {
+      this.stop();
     }
   }
 }
@@ -75,7 +82,7 @@ export class Timeline {
   public constructor(elements: TimelineElement[]) {
     this.elements = elements;
     this.totalDuration = elements.reduce((sum, element) => {
-      return sum + element.getDuration();
+      return sum + (element.getDuration() ?? 0);
     }, 0);
   }
 
@@ -95,36 +102,30 @@ export class Timeline {
 }
 
 export class Timer {
-  private duration: number;
-  private remaining: number;
-
   public onTick: (remaining: number) => void = () => { };
   public onFrame: (remaining: number) => void = () => { };
-  public onFinish: () => void = () => { };
 
-  public constructor(duration: number) {
-    this.duration = duration;
-    this.remaining = duration;
-  }
+  private running: boolean = false;
+
+  public constructor() { }
 
   public async run(): Promise<void> {
+    this.running = true;
     const startTime = performance.now() / 1000;
     let lastTickTime = startTime;
 
     return new Promise((resolve) => {
       const update = (time: number): void => {
-        const runningTime = time / 1000 - startTime;
-        this.remaining = this.duration - runningTime;
-        this.onFrame(this.remaining);
-
-        if (this.remaining <= 0) {
-          this.onFinish();
+        if (!this.running) {
           resolve();
           return;
         }
 
+        const runningTime = time / 1000 - startTime;
+        this.onFrame(runningTime);
+
         if (time - lastTickTime >= 1000) {
-          this.onTick(this.remaining);
+          this.onTick(runningTime);
           lastTickTime = time;
         }
 
@@ -135,11 +136,9 @@ export class Timer {
     });
   }
 
-  public getDuration(): number {
-    return this.duration;
-  }
-
-  public getRemaining(): number {
-    return this.remaining;
+  public stop(): void {
+    this.running = false;
+    this.onTick = () => { };
+    this.onFrame = () => { };
   }
 };

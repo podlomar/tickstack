@@ -2,20 +2,21 @@ const template = (str, args) => {
     return str.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (_, key) => args[key]);
 };
 export class Countdown {
+    duration;
     startPhrase;
     endPhrase;
     timer;
     constructor(duration, startPhrase, endPhrase) {
-        this.timer = new Timer(duration);
+        this.duration = duration;
+        this.timer = new Timer();
         this.timer.onTick = this.handleTick.bind(this);
-        this.timer.onFinish = this.handleFinish.bind(this);
         this.startPhrase = startPhrase;
         this.endPhrase = endPhrase;
     }
     async run() {
         const countdownElement = document.getElementById('countdown');
-        countdownElement.textContent = template(this.startPhrase, { remains: this.timer.getRemaining() });
-        const utterStart = new SpeechSynthesisUtterance(template(this.startPhrase, { remains: this.timer.getRemaining() }));
+        countdownElement.textContent = template(this.startPhrase, { remains: this.duration });
+        const utterStart = new SpeechSynthesisUtterance(template(this.startPhrase, { remains: this.duration }));
         window.speechSynthesis.speak(utterStart);
         return new Promise((resolve) => {
             utterStart.onend = async () => {
@@ -24,20 +25,24 @@ export class Countdown {
             };
         });
     }
-    getDuration() {
-        return this.timer.getDuration();
-    }
-    handleTick(remaining) {
-        console.log(`Remaining time: ${remaining} ms`);
-        const countdownElement = document.getElementById('countdown');
-        countdownElement.textContent = template(this.startPhrase, { remains: remaining });
-    }
-    handleFinish() {
+    stop() {
+        this.timer.stop();
         const countdownElement = document.getElementById('countdown');
         countdownElement.textContent = template(this.endPhrase ?? '0', { remains: 0 });
         if (this.endPhrase !== undefined) {
             const utterFinish = new SpeechSynthesisUtterance(template(this.endPhrase, { remains: 0 }));
             window.speechSynthesis.speak(utterFinish);
+        }
+    }
+    getDuration() {
+        return this.duration;
+    }
+    handleTick(elapsed) {
+        const remaining = this.duration - elapsed;
+        const countdownElement = document.getElementById('countdown');
+        countdownElement.textContent = template(this.startPhrase, { remains: remaining });
+        if (remaining <= 0) {
+            this.stop();
         }
     }
 }
@@ -48,7 +53,7 @@ export class Timeline {
     constructor(elements) {
         this.elements = elements;
         this.totalDuration = elements.reduce((sum, element) => {
-            return sum + element.getDuration();
+            return sum + (element.getDuration() ?? 0);
         }, 0);
     }
     async run() {
@@ -64,30 +69,24 @@ export class Timeline {
     }
 }
 export class Timer {
-    duration;
-    remaining;
     onTick = () => { };
     onFrame = () => { };
-    onFinish = () => { };
-    constructor(duration) {
-        this.duration = duration;
-        this.remaining = duration;
-    }
+    running = false;
+    constructor() { }
     async run() {
+        this.running = true;
         const startTime = performance.now() / 1000;
         let lastTickTime = startTime;
         return new Promise((resolve) => {
             const update = (time) => {
-                const runningTime = time / 1000 - startTime;
-                this.remaining = this.duration - runningTime;
-                this.onFrame(this.remaining);
-                if (this.remaining <= 0) {
-                    this.onFinish();
+                if (!this.running) {
                     resolve();
                     return;
                 }
+                const runningTime = time / 1000 - startTime;
+                this.onFrame(runningTime);
                 if (time - lastTickTime >= 1000) {
-                    this.onTick(this.remaining);
+                    this.onTick(runningTime);
                     lastTickTime = time;
                 }
                 window.requestAnimationFrame(update);
@@ -95,11 +94,10 @@ export class Timer {
             window.requestAnimationFrame(update);
         });
     }
-    getDuration() {
-        return this.duration;
-    }
-    getRemaining() {
-        return this.remaining;
+    stop() {
+        this.running = false;
+        this.onTick = () => { };
+        this.onFrame = () => { };
     }
 }
 ;
