@@ -10,6 +10,7 @@ export class Counter {
         this.duration = duration;
         this.timer = new Timer();
         this.timer.onTick = this.handleTick.bind(this);
+        this.timer.onFrame = this.handleFrame.bind(this);
         this.startPhrase = startPhrase;
         this.endPhrase = endPhrase;
     }
@@ -38,19 +39,29 @@ export class Counter {
         return this.duration;
     }
     handleTick(elapsed) {
-        const displayTime = this.duration === 'stopwatch' ? elapsed : this.duration - elapsed;
-        const countdownElement = document.getElementById('countdown');
-        countdownElement.textContent = template(this.startPhrase, { remains: displayTime });
+        const time = this.duration === 'stopwatch' ? elapsed : this.duration - elapsed;
+        const displayTime = `${Math.round(time)}s`;
+        const countdownElement = document.querySelector('#timer text');
+        countdownElement.textContent = displayTime;
         if (this.duration !== 'stopwatch' && elapsed >= this.duration) {
             this.stop();
         }
     }
+    handleFrame(elapsed) {
+        const ratio = this.duration === 'stopwatch' ? 0 : elapsed / this.duration;
+        const progressElement = document.querySelector('#progress');
+        const length = progressElement.getTotalLength();
+        progressElement.style.strokeDasharray = `${length}`;
+        progressElement.style.strokeDashoffset = `${length * (1 - ratio)}`;
+    }
 }
 export class Timeline {
+    title;
     elements = [];
     currentIndex = 0;
     totalDuration = 0;
-    constructor(elements) {
+    constructor(title, elements) {
+        this.title = title;
         this.elements = elements;
         this.totalDuration = elements.reduce((sum, element) => {
             const duration = element.getDuration();
@@ -64,6 +75,9 @@ export class Timeline {
             await element.run();
             this.currentIndex++;
         }
+    }
+    getTitle() {
+        return this.title;
     }
     getTotalDuration() {
         return this.totalDuration;

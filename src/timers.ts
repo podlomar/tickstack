@@ -27,6 +27,7 @@ export class Counter implements TimelineElement {
     this.duration = duration;
     this.timer = new Timer();
     this.timer.onTick = this.handleTick.bind(this);
+    this.timer.onFrame = this.handleFrame.bind(this);
     this.startPhrase = startPhrase;
     this.endPhrase = endPhrase;
   }
@@ -66,22 +67,35 @@ export class Counter implements TimelineElement {
   }
 
   private handleTick(elapsed: number): void {
-    const displayTime = this.duration === 'stopwatch' ? elapsed : this.duration - elapsed;
-    const countdownElement = document.getElementById('countdown')!;
-    countdownElement.textContent = template(this.startPhrase, { remains: displayTime });
+    const time = this.duration === 'stopwatch' ? elapsed : this.duration - elapsed;
+
+    const displayTime = `${Math.round(time)}s`;
+    const countdownElement = document.querySelector('#timer text')!;
+    countdownElement.textContent = displayTime;
 
     if (this.duration !== 'stopwatch' && elapsed >= this.duration) {
       this.stop();
     }
   }
+
+  private handleFrame(elapsed: number): void {
+    const ratio = this.duration === 'stopwatch' ? 0 : elapsed / this.duration;
+
+    const progressElement = document.querySelector('#progress') as SVGGeometryElement
+    const length = progressElement.getTotalLength();
+    progressElement.style.strokeDasharray = `${length}`;
+    progressElement.style.strokeDashoffset = `${length * (1 - ratio)}`;
+  }
 }
 
 export class Timeline {
+  private title: string;
   private elements: TimelineElement[] = [];
   private currentIndex: number = 0;
   private totalDuration: number = 0;
 
-  public constructor(elements: TimelineElement[]) {
+  public constructor(title: string, elements: TimelineElement[]) {
+    this.title = title;
     this.elements = elements;
     this.totalDuration = elements.reduce((sum, element) => {
       const duration = element.getDuration();
@@ -97,6 +111,10 @@ export class Timeline {
       await element.run();
       this.currentIndex++;
     }
+  }
+
+  public getTitle(): string {
+    return this.title;
   }
 
   public getTotalDuration(): number {

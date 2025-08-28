@@ -13,11 +13,18 @@
 
 <body>
   <h1>TickStack</h1>
+  <svg id="timer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+    <circle cx="50" cy="50" r="45" fill="none" stroke="lightgray" stroke-width="5" />
+    <circle id="progress" transform="rotate(-90 50 50)" cx="50" cy="50" r="45" fill="none" stroke="black"
+      stroke-width="5" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="150" />
+    <text x="50%" y="50%" dy="0.35em" text-anchor="middle" font-size="40">
+      5s
+    </text>
+  </svg>
   <div id="total-duration" class="total-duration">Total Duration: 0 s</div>
+  <div id="timelines"></div>
   <div id="timer-container">
     <div id="countdown" class="countdown">0 s</div>
-    <button id="startStretching">Start Stretching</button>
-    <button id="startWednesday">Start Wednesday</button>
     <button id="nextButton" class="next">Next</button>
   </div>
 </body>
