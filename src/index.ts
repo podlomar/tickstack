@@ -1,5 +1,14 @@
 import { Counter, Timeline } from './timers.js';
 
+const squatsElements = [
+  new Counter(10, 'Prepare for squats'),
+  new Counter('stopwatch', 'Squats set 1'),
+  new Counter(60, 'Rest for {{remains}} seconds'),
+  new Counter('stopwatch', 'Squats set 2'),
+  new Counter(60, 'Rest for {{remains}} seconds'),
+  new Counter('stopwatch', 'Squats set 3'),
+];
+
 const timelines = {
   stretchingLong: new Timeline('Long Stretching Routine', [
     new Counter(10, 'Prepare for quads stretch'),
@@ -78,12 +87,7 @@ const timelines = {
     new Counter(60 * 4, 'Meditation time for 4 minutes! Relax and breathe deeply', 'Congratulations! You have completed the short morning  stretching routine!'),
   ]),
   wednesday: new Timeline('Wednesday Workout', [
-    new Counter(10, 'Prepare for squats'),
-    new Counter('stopwatch', 'Squats set 1'),
-    new Counter(60, 'Rest for {{remains}} seconds'),
-    new Counter('stopwatch', 'Squats set 2'),
-    new Counter(60, 'Rest for {{remains}} seconds'),
-    new Counter('stopwatch', 'Squats set 3'),
+    ...squatsElements,
     new Counter(60, 'Relax and prepare for next exercise'),
     new Counter(15, 'Prepare for glute bridges'),
     new Counter(50, 'Glute bridge for {{remains}} seconds'),
@@ -112,6 +116,15 @@ const timelines = {
     new Counter(30, 'Side plank for {{remains}} seconds, set 3'),
     new Counter(5, 'Switch sides'),
     new Counter(30, 'Side plank for {{remains}} seconds, set 3', 'Awesome! You have completed the morning workout!'),
+  ]),
+  friday: new Timeline('Friday Workout', [
+    ...squatsElements,
+    new Counter(30, 'Prepare for ring rows'),
+    new Counter('stopwatch', 'Ring rows set 1'),
+    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter('stopwatch', 'Ring rows set 2'),
+    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter('stopwatch', 'Ring rows set 3', 'Fantastic! You have completed the Friday workout!'),
   ]),
 };
 
