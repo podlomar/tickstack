@@ -5,12 +5,20 @@ const template = (str: string, args: { [key: string]: any }) => {
   );
 };
 
+export interface TimerState {
+  running: boolean;
+  text: string;
+  displayTime: string;
+  progressRatio: number;
+}
+
 type Duration = number | 'stopwatch';
 
 interface TimelineElement {
   run(): Promise<void>;
   stop(): void;
   getDuration(): Duration;
+  onStateChange(callback: (state: TimerState) => void): void;
 }
 
 export class Counter implements TimelineElement {
@@ -18,6 +26,7 @@ export class Counter implements TimelineElement {
   private startPhrase: string;
   private endPhrase?: string;
   private timer: Timer;
+  private stateCallback: (state: TimerState) => void = () => { };
 
   public constructor(
     duration: Duration,
@@ -27,9 +36,12 @@ export class Counter implements TimelineElement {
     this.duration = duration;
     this.timer = new Timer();
     this.timer.onTick = this.handleTick.bind(this);
-    this.timer.onFrame = this.handleFrame.bind(this);
     this.startPhrase = startPhrase;
     this.endPhrase = endPhrase;
+  }
+
+  public onStateChange(callback: (state: TimerState) => void): void {
+    this.stateCallback = callback;
   }
 
   public async run(): Promise<void> {
@@ -70,21 +82,23 @@ export class Counter implements TimelineElement {
     const time = this.duration === 'stopwatch' ? elapsed : this.duration - elapsed;
 
     const displayTime = `${Math.round(time)}s`;
-    const countdownElement = document.querySelector('#timer text')!;
-    countdownElement.textContent = displayTime;
+    const ratio = this.duration === 'stopwatch' ? 0 : elapsed / this.duration;
+
+    this.stateCallback({
+      running: true,
+      text: template(this.startPhrase, { remains: Math.ceil(time) }),
+      displayTime,
+      progressRatio: Math.min(ratio, 1),
+    });
+
+    // const progressElement = document.querySelector('#progress') as SVGGeometryElement
+    // const length = progressElement.getTotalLength();
+    // progressElement.style.strokeDasharray = `${length}`;
+    // progressElement.style.strokeDashoffset = `${length * (1 - ratio)}`;
 
     if (this.duration !== 'stopwatch' && elapsed >= this.duration) {
       this.stop();
     }
-  }
-
-  private handleFrame(elapsed: number): void {
-    const ratio = this.duration === 'stopwatch' ? 0 : elapsed / this.duration;
-
-    const progressElement = document.querySelector('#progress') as SVGGeometryElement
-    const length = progressElement.getTotalLength();
-    progressElement.style.strokeDasharray = `${length}`;
-    progressElement.style.strokeDashoffset = `${length * (1 - ratio)}`;
   }
 }
 
@@ -93,6 +107,7 @@ export class Timeline {
   private elements: TimelineElement[] = [];
   private currentIndex: number = 0;
   private totalDuration: number = 0;
+  private stateCallback: (state: TimerState) => void = () => { };
 
   public constructor(title: string, elements: TimelineElement[]) {
     this.title = title;
@@ -103,11 +118,15 @@ export class Timeline {
     }, 0);
   }
 
+  public onStateChange(callback: (state: TimerState) => void): void {
+    this.stateCallback = callback;
+  }
+
   public async run(): Promise<void> {
     this.currentIndex = 0;
-
     while (this.currentIndex < this.elements.length) {
       const element = this.elements[this.currentIndex];
+      element.onStateChange(this.stateCallback);
       await element.run();
       this.currentIndex++;
     }
@@ -130,42 +149,27 @@ export class Timeline {
 
 export class Timer {
   public onTick: (remaining: number) => void = () => { };
-  public onFrame: (remaining: number) => void = () => { };
-
-  private running: boolean = false;
-
+  private resolve: (() => void) | null = null;
   public constructor() { }
 
   public async run(): Promise<void> {
-    this.running = true;
-    const startTime = performance.now() / 1000;
-    let lastTickTime = startTime;
-
     return new Promise((resolve) => {
-      const update = (time: number): void => {
-        if (!this.running) {
-          resolve();
-          return;
-        }
+      let elapsed = 0;
+      const intervalId = window.setInterval(() => {
+        elapsed++;
+        this.onTick(elapsed);
+        console.log(elapsed);
+      }, 1000);
 
-        const runningTime = time / 1000 - startTime;
-        this.onFrame(runningTime);
-
-        if (time - lastTickTime >= 1000) {
-          this.onTick(runningTime);
-          lastTickTime = time;
-        }
-
-        window.requestAnimationFrame(update);
+      this.resolve = () => {
+        window.clearInterval(intervalId);
+        this.resolve = null;
+        resolve();
       };
-
-      window.requestAnimationFrame(update);
     });
   }
 
   public stop(): void {
-    this.running = false;
-    this.onTick = () => { };
-    this.onFrame = () => { };
+    this.resolve?.();
   }
 };

@@ -1,6 +1,6 @@
-import { Counter, Timeline } from './timers.js';
+import { Counter, Timeline } from './timers';
 
-const squatsElements = [
+const squats = [
   new Counter(10, 'Prepare for squats'),
   new Counter('stopwatch', 'Squats set 1'),
   new Counter(60, 'Rest for {{remains}} seconds'),
@@ -9,8 +9,8 @@ const squatsElements = [
   new Counter('stopwatch', 'Squats set 3'),
 ];
 
-const timelines = {
-  stretchingLong: new Timeline('Long Stretching Routine', [
+export const timelines = [
+  new Timeline('Long Stretching Routine', [
     new Counter(10, 'Prepare for quads stretch'),
     new Counter(30, 'Quads stretch for {{remains}} seconds'),
     new Counter(5, 'Switch legs'),
@@ -61,7 +61,7 @@ const timelines = {
     new Counter(20, 'Get ready for meditation'),
     new Counter(60 * 7, 'Meditation time for 7 minutes! Relax and breathe deeply', 'Congratulations! You have completed the long morning stretching routine!'),
   ]),
-  stretchingShort: new Timeline('Short Stretching Routine', [
+  new Timeline('Short Stretching Routine', [
     new Counter(10, 'Prepare for calf stretch'),
     new Counter(30, 'Calf stretch for {{remains}} seconds'),
     new Counter(3, 'Switch legs'),
@@ -86,8 +86,8 @@ const timelines = {
     new Counter(20, 'Get ready for meditation'),
     new Counter(60 * 4, 'Meditation time for 4 minutes! Relax and breathe deeply', 'Congratulations! You have completed the short morning  stretching routine!'),
   ]),
-  wednesday: new Timeline('Wednesday Workout', [
-    ...squatsElements,
+  new Timeline('Wednesday Workout', [
+    ...squats,
     new Counter(60, 'Relax and prepare for next exercise'),
     new Counter(15, 'Prepare for glute bridges'),
     new Counter(50, 'Glute bridge for {{remains}} seconds'),
@@ -96,7 +96,7 @@ const timelines = {
     new Counter(50, 'Rest for {{remains}} seconds'),
     new Counter(50, 'Glute bridge for {{remains}} seconds', 'Great job! You have completed the morning workout!'),
   ]),
-  thursday: new Timeline('Thursday Workout', [
+  new Timeline('Thursday Workout', [
     new Counter(10, 'Prepare for knee push-ups'),
     new Counter('stopwatch', 'Knee push-ups set 1'),
     new Counter(60, 'Rest for {{remains}} seconds'),
@@ -117,8 +117,8 @@ const timelines = {
     new Counter(5, 'Switch sides'),
     new Counter(30, 'Side plank for {{remains}} seconds, set 3', 'Awesome! You have completed the morning workout!'),
   ]),
-  friday: new Timeline('Friday Workout', [
-    ...squatsElements,
+  new Timeline('Friday Workout', [
+    ...squats,
     new Counter(30, 'Prepare for ring rows'),
     new Counter('stopwatch', 'Ring rows set 1'),
     new Counter(60, 'Rest for {{remains}} seconds'),
@@ -126,35 +126,4 @@ const timelines = {
     new Counter(60, 'Rest for {{remains}} seconds'),
     new Counter('stopwatch', 'Ring rows set 3', 'Fantastic! You have completed the Friday workout!'),
   ]),
-};
-
-let currentTimeline: Timeline | null = null;
-
-const timelinesElement = document.querySelector('#timelines')!;
-
-for (const timeline of Object.values(timelines)) {
-  const button = document.createElement('button');
-  button.textContent = timeline.getTitle();
-  button.addEventListener('click', () => {
-    timeline.run();
-    currentTimeline = timeline;
-    document.querySelector('#total-duration')!.textContent = `Total Duration: ${formatDuration(timeline.getTotalDuration() ?? 0)}`;
-  });
-  timelinesElement.appendChild(button);
-}
-
-document.querySelector('#nextButton')!.addEventListener('click', () => {
-  currentTimeline?.next();
-});
-
-window.onkeyup = (e) => {
-  if (e.code === 'Space') {
-    currentTimeline?.next();
-  }
-};
-
-const formatDuration = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${minutes} min ${secs} sec`;
-};
+];

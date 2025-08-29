@@ -1,0 +1,93 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+h1 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+#timer {
+  display: block;
+  margin: 20px auto;
+  max-width: 200px;
+  height: auto;
+}
+
+.total-duration {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 20px 0;
+  color: #555;
+}
+
+#timelines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+#timelines button {
+  padding: 12px 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+#timelines button:hover {
+  background-color: #0056b3;
+}
+
+#timer-container {
+  text-align: center;
+  margin: 40px 0;
+}
+
+.countdown {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333;
+  margin: 20px 0;
+}
+
+.next {
+  padding: 12px 30px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.next:hover {
+  background-color: #1e7e34;
+}
+
+#progress {
+  transition: stroke-dashoffset 1s linear;
+}
