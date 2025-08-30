@@ -91,14 +91,41 @@ export class Counter implements TimelineElement {
       progressRatio: Math.min(ratio, 1),
     });
 
-    // const progressElement = document.querySelector('#progress') as SVGGeometryElement
-    // const length = progressElement.getTotalLength();
-    // progressElement.style.strokeDasharray = `${length}`;
-    // progressElement.style.strokeDashoffset = `${length * (1 - ratio)}`;
-
     if (this.duration !== 'stopwatch' && elapsed >= this.duration) {
       this.stop();
     }
+  }
+}
+
+export class Phrase implements TimelineElement {
+  private phrase: string;
+  private stateCallback: (state: TimerState) => void = () => { };
+
+  public constructor(phrase: string) {
+    this.phrase = phrase;
+  }
+
+  public onStateChange(callback: (state: TimerState) => void): void {
+    this.stateCallback = callback;
+  }
+
+  public async run(): Promise<void> {
+    const utterance = new SpeechSynthesisUtterance(this.phrase);
+    window.speechSynthesis.speak(utterance);
+
+    return new Promise((resolve) => {
+      utterance.onend = () => {
+        resolve();
+      };
+    });
+  }
+
+  public stop(): void {
+    window.speechSynthesis.cancel();
+  }
+
+  public getDuration(): Duration {
+    return 0;
   }
 }
 
