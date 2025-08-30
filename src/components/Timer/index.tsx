@@ -1,36 +1,48 @@
+import { useRef } from 'react';
 import { TimerState } from '../../timers';
 
 interface Props {
   state: TimerState | null;
 }
 
+const TIMER_RADIUS = 45;
+const totalLength = Math.PI * 2 * TIMER_RADIUS;
+
 export const Timer = ({ state }: Props) => {
+  const computeDashOffset = (state: TimerState | null) => {
+    if (state === null) {
+      return totalLength;
+    }
+
+    return totalLength * (1 - state.progressRatio);
+  };
+
   return (
     <svg
+      className="timer"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 100 100"
-      width="100"
-      height="100"
     >
       <circle
         cx="50"
         cy="50"
-        r="45"
+        r={TIMER_RADIUS}
         fill="none"
-        stroke="lightgray"
-        strokeWidth="5"
+        stroke="#555"
+        strokeWidth="8"
       />
       <circle
+        className="progress"
         transform="rotate(-90 50 50)"
         cx="50"
         cy="50"
-        r="45"
+        r={TIMER_RADIUS}
         fill="none"
-        stroke="black"
-        strokeWidth="5"
+        stroke="lightblue"
+        strokeWidth="9"
         strokeLinecap="round"
         strokeDasharray="283"
-        strokeDashoffset="150"
+        strokeDashoffset={computeDashOffset(state)}
       />
       <text
         x="50%"
@@ -38,8 +50,9 @@ export const Timer = ({ state }: Props) => {
         dy="0.35em"
         textAnchor="middle"
         fontSize="40"
+        fill="white"
       >
-        {state?.displayTime}
+        {state?.displayTime ?? '0s'}
       </text>
     </svg>
   );

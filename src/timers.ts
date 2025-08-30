@@ -155,6 +155,8 @@ export class Timer {
   public async run(): Promise<void> {
     return new Promise((resolve) => {
       let elapsed = 0;
+      this.onTick(elapsed);
+
       const intervalId = window.setInterval(() => {
         elapsed++;
         this.onTick(elapsed);

@@ -38,7 +38,9 @@ export const App = ({ timelines }: Props) => {
   return (
     <div>
       <h1>TickStack</h1>
-      <Timer state={timerState} />
+      <div className="timerContainer">
+        <Timer state={timerState} />
+      </div>
       <div id="total-duration" className="total-duration">Total Duration: 0 s</div>
       <div id="timelines">
         {timelines.map((timeline) => (

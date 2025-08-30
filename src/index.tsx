@@ -22,12 +22,6 @@ root.render(<App timelines={timelines} />);
 //   timelinesElement.appendChild(button);
 // }
 
-// window.onkeyup = (e) => {
-//   if (e.code === 'Space') {
-//     currentTimeline?.next();
-//   }
-// };
-
 // const formatDuration = (seconds: number): string => {
 //   const minutes = Math.floor(seconds / 60);
 //   const secs = seconds % 60;

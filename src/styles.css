@@ -27,12 +27,16 @@ h1 {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-#timer {
-  display: block;
-  margin: 20px auto;
-  max-width: 200px;
-  height: auto;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+.timer {
+  width: 14rem;
+  height: 14rem;
+}
+
+.timerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .total-duration {
@@ -124,19 +128,6 @@ h1 {
   background: linear-gradient(135deg, #f2a4fc 0%, #f6687d 100%);
 }
 
-#progress {
+.progress {
   transition: stroke-dashoffset 1s linear;
-  stroke: #667eea;
-  filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.5));
-}
-
-/* SVG timer styling */
-#timer circle:first-child {
-  stroke: rgba(255, 255, 255, 0.2);
-}
-
-#timer text {
-  fill: #ffffff;
-  font-weight: 300;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
