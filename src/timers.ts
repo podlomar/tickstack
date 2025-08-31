@@ -5,12 +5,28 @@ const template = (str: string, args: { [key: string]: any }) => {
   );
 };
 
-export interface TimerState {
+export interface CountdownState {
+  type: 'countdown';
   running: boolean;
   text: string;
-  displayTime: string;
+  remaining: number;
   progressRatio: number;
 }
+
+export interface StopwatchState {
+  type: 'stopwatch';
+  running: boolean;
+  text: string;
+  elapsed: number;
+}
+
+export interface SpeechState {
+  type: 'speech';
+  running: boolean;
+  text: string;
+}
+
+export type TimerState = CountdownState | StopwatchState | SpeechState;
 
 type Duration = number | 'stopwatch';
 
@@ -45,12 +61,15 @@ export class Counter implements TimelineElement {
   }
 
   public async run(): Promise<void> {
-    const countdownElement = document.getElementById('countdown')!;
-    countdownElement.textContent = template(this.startPhrase, { remains: this.duration });
+    const phrase = template(this.startPhrase, { remains: this.duration });
 
-    const utterStart = new SpeechSynthesisUtterance(
-      template(this.startPhrase, { remains: this.duration })
-    );
+    this.stateCallback({
+      type: 'speech',
+      running: true,
+      text: phrase,
+    });
+
+    const utterStart = new SpeechSynthesisUtterance(phrase);
     window.speechSynthesis.speak(utterStart);
 
     return new Promise((resolve) => {
@@ -79,17 +98,24 @@ export class Counter implements TimelineElement {
   }
 
   private handleTick(elapsed: number): void {
-    const time = this.duration === 'stopwatch' ? elapsed : this.duration - elapsed;
-
-    const displayTime = `${Math.round(time)}s`;
-    const ratio = this.duration === 'stopwatch' ? 0 : elapsed / this.duration;
-
-    this.stateCallback({
-      running: true,
-      text: template(this.startPhrase, { remains: Math.ceil(time) }),
-      displayTime,
-      progressRatio: Math.min(ratio, 1),
-    });
+    if (this.duration === 'stopwatch') {
+      this.stateCallback({
+        type: 'stopwatch',
+        running: false,
+        text: this.startPhrase,
+        elapsed,
+      });
+    } else {
+      const remaining = Math.max(this.duration - elapsed, 0);
+      const ratio = elapsed / this.duration;
+      this.stateCallback({
+        type: 'countdown',
+        running: true,
+        text: template(this.startPhrase, { remains: Math.ceil(remaining) }),
+        remaining,
+        progressRatio: Math.min(ratio, 1),
+      });
+    }
 
     if (this.duration !== 'stopwatch' && elapsed >= this.duration) {
       this.stop();
@@ -110,6 +136,12 @@ export class Phrase implements TimelineElement {
   }
 
   public async run(): Promise<void> {
+    this.stateCallback({
+      type: 'speech',
+      running: true,
+      text: this.phrase,
+    });
+
     const utterance = new SpeechSynthesisUtterance(this.phrase);
     window.speechSynthesis.speak(utterance);
 

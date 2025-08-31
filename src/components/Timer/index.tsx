@@ -8,14 +8,54 @@ interface Props {
 const TIMER_RADIUS = 45;
 const totalLength = Math.PI * 2 * TIMER_RADIUS;
 
-export const Timer = ({ state }: Props) => {
-  const computeDashOffset = (state: TimerState | null) => {
-    if (state === null) {
-      return totalLength;
-    }
+interface Dash {
+  dashArray: number;
+  dashOffset: number;
+}
 
-    return totalLength * (1 - state.progressRatio);
+const computeDash = (state: TimerState | null): Dash => {
+  if (state === null) {
+    return { dashArray: totalLength, dashOffset: totalLength };
+  }
+
+  if (state.type === 'speech') {
+    return { dashArray: totalLength, dashOffset: totalLength };
+  }
+
+  if (state.type === 'stopwatch') {
+    return {
+      dashArray: totalLength / 6,
+      dashOffset: state.elapsed * (totalLength / 6)
+    };
+  }
+
+  return {
+    dashArray: totalLength,
+    dashOffset: totalLength * (1 - state.progressRatio),
   };
+}
+
+const buildText = (state: TimerState | null): string => {
+  if (state === null) {
+    return '';
+  }
+
+  if (state.type === 'speech') {
+    return '...';
+  }
+
+  if (state.type === 'stopwatch') {
+    return `${state.elapsed}s`;
+  }
+
+  return `${state.remaining}s`;
+}
+
+export const Timer = ({ state }: Props) => {
+  const dash = computeDash(state);
+  const text = buildText(state);
+
+  console.log(state, dash, text);
 
   return (
     <svg
@@ -41,18 +81,16 @@ export const Timer = ({ state }: Props) => {
         stroke="lightblue"
         strokeWidth="9"
         strokeLinecap="round"
-        strokeDasharray="283"
-        strokeDashoffset={computeDashOffset(state)}
+        strokeDasharray={dash.dashArray}
+        strokeDashoffset={dash.dashOffset}
       />
       <text
+        className="timerText"
         x="50%"
         y="50%"
         dy="0.35em"
-        textAnchor="middle"
-        fontSize="40"
-        fill="white"
       >
-        {state?.displayTime ?? '0s'}
+        {text}
       </text>
     </svg>
   );

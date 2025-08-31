@@ -32,6 +32,13 @@ h1 {
   height: 14rem;
 }
 
+.timerText {
+  font-size: 2.5rem;
+  fill: #ffffff;
+  text-anchor: middle;
+  user-select: none;
+}
+
 .timerContainer {
   display: flex;
   flex-direction: column;
