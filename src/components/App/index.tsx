@@ -13,7 +13,6 @@ export const App = ({ timelines }: Props) => {
   useEffect(() => {
     const handleStateChange = (state: TimerState) => {
       setTimerState(state);
-      console.log(state);
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {

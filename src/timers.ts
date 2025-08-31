@@ -219,7 +219,6 @@ export class Timer {
       const intervalId = window.setInterval(() => {
         elapsed++;
         this.onTick(elapsed);
-        console.log(elapsed);
       }, 1000);
 
       this.resolve = () => {

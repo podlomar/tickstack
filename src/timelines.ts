@@ -37,6 +37,29 @@ const ringRows = [
 ];
 
 export const timelines = [
+  new Timeline('Pre-run lower back warmup', [
+    new Counter(10, 'Prepare for cat-cow stretch'),
+    new Counter(60, 'Cat-cow stretch for {{remains}} seconds'),
+    new Counter(5, 'Prepare bird-dog stretch'),
+    new Counter(15, 'Bird-dog stretch for {{remains}} seconds'),
+    new Counter(5, 'Switch sides'),
+    new Counter(15, 'Bird-dog stretch for {{remains}} seconds'),
+    new Counter(5, 'Switch sides'),
+    new Counter(15, 'Bird-dog stretch for {{remains}} seconds'),
+    new Counter(5, 'Switch sides'),
+    new Counter(15, 'Bird-dog stretch for {{remains}} seconds'),
+    new Counter(10, 'Prepare for child\'s pose'),
+    new Counter(60, 'Child\'s pose for {{remains}} seconds'),
+    new Counter(10, 'Prepare for standing hip circles'),
+    new Counter(15, 'Standing hip circles for {{remains}} seconds'),
+    new Phrase('Switch directions'),
+    new Counter(15, 'Standing hip circles for {{remains}} seconds'),
+    new Counter(5, 'Switch sides'),
+    new Counter(15, 'Standing hip circles for {{remains}} seconds'),
+    new Phrase('Switch directions'),
+    new Counter(15, 'Standing hip circles for {{remains}} seconds'),
+    new Phrase('Great! You are ready for your run!'),
+  ]),
   new Timeline('Long Stretching Routine', [
     new Counter(10, 'Prepare for quads stretch'),
     new Counter(30, 'Quads stretch for {{remains}} seconds'),

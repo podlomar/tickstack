@@ -55,8 +55,6 @@ export const Timer = ({ state }: Props) => {
   const dash = computeDash(state);
   const text = buildText(state);
 
-  console.log(state, dash, text);
-
   return (
     <svg
       className="timer"
