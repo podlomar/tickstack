@@ -38,7 +38,7 @@ const ringRows = [
 
 export const timelines = [
   new Timeline('Pre-run lower back warmup', [
-    new Counter(10, 'Prepare for cat-cow stretch'),
+    new Counter(15, 'Prepare for cat-cow stretch'),
     new Counter(60, 'Cat-cow stretch for {{remains}} seconds'),
     new Counter(5, 'Prepare bird-dog stretch'),
     new Counter(15, 'Bird-dog stretch for {{remains}} seconds'),
@@ -120,15 +120,15 @@ export const timelines = [
     new Counter(15, 'Prepare for supta virasana'),
     new Counter(20, 'Supta virasana for {{remains}} seconds'),
 
-    new Counter(20, 'Prepare for front split'),
-    new Counter(30, 'Front split for {{remains}} seconds'),
-    new Counter(15, 'Switch legs'),
-    new Counter(30, 'Front split for {{remains}} seconds'),
-
     new Counter(15, 'Prepare for hip flexor stretch'),
     new Counter(30, 'Hip flexor stretch for {{remains}} seconds'),
     new Counter(15, 'Switch legs'),
     new Counter(30, 'Hip flexor stretch for {{remains}} seconds'),
+
+    new Counter(20, 'Prepare for front split'),
+    new Counter(30, 'Front split for {{remains}} seconds'),
+    new Counter(15, 'Switch legs'),
+    new Counter(30, 'Front split for {{remains}} seconds'),
 
     new Counter(15, 'Prepare for seated forward bend'),
     new Counter(30, 'Seated forward bend for {{remains}} seconds'),
