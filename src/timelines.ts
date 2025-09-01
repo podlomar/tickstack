@@ -36,6 +36,15 @@ const ringRows = [
   new Counter('stopwatch', 'Ring rows set 3'),
 ];
 
+const frontPlanks = [
+  new Counter(15, 'Prepare for front planks'),
+  new Counter(35, 'Front plank for {{remains}} seconds, set 1'),
+  new Counter(50, 'Rest for {{remains}} seconds'),
+  new Counter(35, 'Front plank for {{remains}} seconds, set 2'),
+  new Counter(50, 'Rest for {{remains}} seconds'),
+  new Counter(35, 'Front plank for {{remains}} seconds, set 3'),
+];
+
 export const timelines = [
   new Timeline('Pre-run lower back warmup', [
     new Counter(15, 'Prepare for cat-cow stretch'),
@@ -134,6 +143,20 @@ export const timelines = [
     new Counter(60, 'Cool down and relax'),
     new Counter(20, 'Get ready for meditation'),
     new Counter(60 * 4, 'Meditation time for 4 minutes! Relax and breathe deeply', 'Congratulations! You have completed the short morning  stretching routine!'),
+  ]),
+  new Timeline('Monday Workout', [
+    new Phrase('Starting Monday workout routine'),
+    ...squats,
+    new Counter(60, 'Relax and prepare for next exercise'),
+    ...kneePushUps,
+    new Phrase('Great job! You have completed the Monday workout!'),
+  ]),
+  new Timeline('Tuesday Workout', [
+    new Phrase('Starting Tuesday workout routine'),
+    ...ringRows,
+    new Counter(60, 'Relax and prepare for next exercise'),
+    ...frontPlanks,
+    new Phrase('Great job! You have completed the Tuesday workout!'),
   ]),
   new Timeline('Wednesday Workout', [
     new Phrase('Starting Wednesday workout routine'),
