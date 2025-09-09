@@ -143,10 +143,13 @@ export class Phrase implements TimelineElement {
     });
 
     const utterance = new SpeechSynthesisUtterance(this.phrase);
+    const now = performance.now();
     window.speechSynthesis.speak(utterance);
 
     return new Promise((resolve) => {
-      utterance.onend = () => {
+      utterance.onend = (e) => {
+        const duration = e.elapsedTime / 1000;
+        console.log(`Spoken phrase "${this.phrase}" took ${duration} seconds`);
         resolve();
       };
     });

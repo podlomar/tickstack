@@ -38,16 +38,22 @@ const ringRows = [
 
 const frontPlanks = [
   new Counter(15, 'Prepare for front planks'),
-  new Counter(35, 'Front plank for {{remains}} seconds, set 1'),
-  new Counter(50, 'Rest for {{remains}} seconds'),
-  new Counter(35, 'Front plank for {{remains}} seconds, set 2'),
-  new Counter(50, 'Rest for {{remains}} seconds'),
-  new Counter(35, 'Front plank for {{remains}} seconds, set 3'),
+  new Counter(40, 'Front plank for {{remains}} seconds, set 1'),
+  new Counter(60, 'Rest for {{remains}} seconds'),
+  new Counter(40, 'Front plank for {{remains}} seconds, set 2'),
+  new Counter(60, 'Rest for {{remains}} seconds'),
+  new Counter(40, 'Front plank for {{remains}} seconds, set 3'),
+];
+
+const barHangs = [
+  new Counter(15, 'Prepare for bar hangs'),
+  new Counter(25, 'Bar hang for {{remains}} seconds'),
 ];
 
 export const timelines = [
   new Timeline('Pre-run lower back warmup', [
-    new Counter(15, 'Prepare for cat-cow stretch'),
+    new Phrase('Starting pre-run lower back warmup routine'),
+    new Counter(20, 'Prepare for cat-cow stretch'),
     new Counter(60, 'Cat-cow stretch for {{remains}} seconds'),
     new Counter(5, 'Prepare bird-dog stretch'),
     new Counter(15, 'Bird-dog stretch for {{remains}} seconds'),
@@ -56,7 +62,7 @@ export const timelines = [
     new Counter(15, 'Switch sides'),
     new Counter(15, 'Prepare for child\'s pose'),
     new Counter(60, 'Child\'s pose for {{remains}} seconds'),
-    new Counter(15, 'Prepare for standing hip circles'),
+    new Counter(20, 'Prepare for standing hip circles'),
     new Counter(15, 'Standing hip circles for {{remains}} seconds'),
     new Counter(15, 'Switch directions'),
     new Counter(15, 'Switch sides'),
@@ -156,6 +162,8 @@ export const timelines = [
     ...ringRows,
     new Counter(60, 'Relax and prepare for next exercise'),
     ...frontPlanks,
+    new Counter(60, 'Relax and prepare for next exercise'),
+    ...barHangs,
     new Phrase('Great job! You have completed the Tuesday workout!'),
   ]),
   new Timeline('Wednesday Workout', [
