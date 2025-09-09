@@ -170,6 +170,7 @@ export class Timeline {
   private currentIndex: number = 0;
   private totalDuration: number = 0;
   private stateCallback: (state: TimerState) => void = () => { };
+  private wakeLock: WakeLockSentinel | null = null;
 
   public constructor(title: string, elements: TimelineElement[]) {
     this.title = title;
@@ -185,12 +186,31 @@ export class Timeline {
   }
 
   public async run(): Promise<void> {
+    await this.requestWakeLock();
+
     this.currentIndex = 0;
     while (this.currentIndex < this.elements.length) {
       const element = this.elements[this.currentIndex];
       element.onStateChange(this.stateCallback);
       await element.run();
       this.currentIndex++;
+    }
+
+    this.releaseWakeLock();
+  }
+
+  private async requestWakeLock(): Promise<void> {
+    if ('wakeLock' in navigator) {
+      this.wakeLock = await navigator.wakeLock.request('screen');
+      console.log('Wake Lock is active');
+    }
+  }
+
+  private releaseWakeLock(): void {
+    if (this.wakeLock !== null) {
+      this.wakeLock.release();
+      this.wakeLock = null;
+      console.log('Wake Lock is released');
     }
   }
 
