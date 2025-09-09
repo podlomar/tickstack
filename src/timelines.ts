@@ -1,4 +1,4 @@
-import { Counter, Phrase, Timeline } from './timers';
+import { Counter, Phrase, Timeline, TimelineElement } from './timers';
 
 const kneePushUps = [
   new Counter(15, 'Prepare for knee push-ups'),
@@ -36,19 +36,39 @@ const ringRows = [
   new Counter('stopwatch', 'Ring rows set 3'),
 ];
 
-const frontPlanks = [
-  new Counter(15, 'Prepare for front planks'),
-  new Counter(40, 'Front plank for {{remains}} seconds, set 1'),
-  new Counter(60, 'Rest for {{remains}} seconds'),
-  new Counter(40, 'Front plank for {{remains}} seconds, set 2'),
-  new Counter(60, 'Rest for {{remains}} seconds'),
-  new Counter(40, 'Front plank for {{remains}} seconds, set 3'),
+const sidePlanks = [
+  new Counter(15, 'Prepare for side planks'),
+  new Counter(30, 'Side plank for {{remains}} seconds, set 1'),
+  new Counter(5, 'Switch sides'),
+  new Counter(30, 'Side plank for {{remains}} seconds, set 1'),
+  new Counter(30, 'Rest for {{remains}} seconds'),
+  new Counter(30, 'Side plank for {{remains}} seconds, set 2'),
+  new Counter(5, 'Switch sides'),
+  new Counter(30, 'Side plank for {{remains}} seconds, set 2'),
+  new Counter(30, 'Rest for {{remains}} seconds'),
+  new Counter(30, 'Side plank for {{remains}} seconds, set 3'),
+  new Counter(5, 'Switch sides'),
+  new Counter(30, 'Side plank for {{remains}} seconds, set 3'),
 ];
 
-const barHangs = [
-  new Counter(15, 'Prepare for bar hangs'),
-  new Counter(25, 'Bar hang for {{remains}} seconds'),
-];
+const createDailyRoutine = (
+  title: string, set1: TimelineElement[], set2: TimelineElement[]
+) => {
+  return new Timeline(
+    title,
+    [
+      new Phrase(`Starting ${title} routine`),
+      ...set1,
+      new Counter(60, 'Rest for {{remains}} seconds and prepare for next exercise'),
+      ...set2,
+      new Counter(60, 'Rest for {{remains}} seconds and prepare for front plank'),
+      new Counter(40, 'Front plank for {{remains}} seconds'),
+      new Counter(60, 'Rest for {{remains}} seconds and prepare for bar hang'),
+      new Counter(25, 'Bar hang for {{remains}} seconds'),
+      new Phrase(`Great job! You have completed the ${title} routine`),
+    ]
+  );
+};
 
 export const timelines = [
   new Timeline('Pre-run lower back warmup', [
@@ -150,57 +170,10 @@ export const timelines = [
     new Counter(20, 'Get ready for meditation'),
     new Counter(60 * 4, 'Meditation time for 4 minutes! Relax and breathe deeply', 'Congratulations! You have completed the short morning  stretching routine!'),
   ]),
-  new Timeline('Monday Workout', [
-    new Phrase('Starting Monday workout routine'),
-    ...squats,
-    new Counter(60, 'Relax and prepare for next exercise'),
-    ...kneePushUps,
-    new Phrase('Great job! You have completed the Monday workout!'),
-  ]),
-  new Timeline('Tuesday Workout', [
-    new Phrase('Starting Tuesday workout routine'),
-    ...ringRows,
-    new Counter(60, 'Relax and prepare for next exercise'),
-    ...frontPlanks,
-    new Counter(60, 'Relax and prepare for next exercise'),
-    ...barHangs,
-    new Phrase('Great job! You have completed the Tuesday workout!'),
-  ]),
-  new Timeline('Wednesday Workout', [
-    new Phrase('Starting Wednesday workout routine'),
-    ...squats,
-    new Counter(60, 'Relax and prepare for next exercise'),
-    ...gluteBridges,
-    new Phrase('Great job! You have completed the Wednesday workout!'),
-  ]),
-  new Timeline('Thursday Workout', [
-    new Phrase('Starting Thursday workout routine'),
-    ...kneePushUps,
-    new Counter(60, 'Relax and prepare for next exercise'),
-    new Counter(15, 'Prepare for side planks'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 1'),
-    new Counter(5, 'Switch sides'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 1'),
-    new Counter(30, 'Rest for {{remains}} seconds'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 2'),
-    new Counter(5, 'Switch sides'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 2'),
-    new Counter(30, 'Rest for {{remains}} seconds'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 3'),
-    new Counter(5, 'Switch sides'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 3', 'Awesome! You have completed the morning workout!'),
-  ]),
-  new Timeline('Friday Workout', [
-    ...squats,
-    new Counter(60, 'Relax and prepare for next exercise'),
-    ...ringRows,
-    new Phrase('Great job! You have completed the Friday workout!'),
-  ]),
-  new Timeline('Saturday Workout', [
-    new Phrase('Starting Saturday workout routine'),
-    ...kneePushUps,
-    new Counter(60, 'Relax and prepare for next exercise'),
-    ...gluteBridges,
-    new Phrase('Great job! You have completed the Saturday workout!'),
-  ]),
+  createDailyRoutine('Monday Workout', squats, kneePushUps),
+  createDailyRoutine('Tuesday Workout', ringRows, sidePlanks),
+  createDailyRoutine('Wednesday Workout', squats, gluteBridges),
+  createDailyRoutine('Thursday Workout', kneePushUps, sidePlanks),
+  createDailyRoutine('Friday Workout', squats, ringRows),
+  createDailyRoutine('Saturday Workout', kneePushUps, gluteBridges),
 ];

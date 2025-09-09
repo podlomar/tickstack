@@ -30,7 +30,7 @@ export type TimerState = CountdownState | StopwatchState | SpeechState;
 
 type Duration = number | 'stopwatch';
 
-interface TimelineElement {
+export interface TimelineElement {
   run(): Promise<void>;
   stop(): void;
   getDuration(): Duration;
