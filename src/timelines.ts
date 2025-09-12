@@ -1,66 +1,89 @@
 import { Counter, Phrase, Timeline, TimelineElement } from './timers';
 
-const kneePushUps = [
-  new Counter(15, 'Prepare for knee push-ups'),
-  new Counter('stopwatch', 'Knee push-ups set 1'),
-  new Counter(60, 'Rest for {{remains}} seconds'),
-  new Counter('stopwatch', 'Knee push-ups set 2'),
-  new Counter(60, 'Rest for {{remains}} seconds'),
-  new Counter('stopwatch', 'Knee push-ups set 3'),
-];
+interface Exercise {
+  name: string;
+  sets: TimelineElement[];
+}
 
-const squats = [
-  new Counter(15, 'Prepare for squats'),
-  new Counter('stopwatch', 'Squats set 1'),
-  new Counter(60, 'Rest for {{remains}} seconds'),
-  new Counter('stopwatch', 'Squats set 2'),
-  new Counter(60, 'Rest for {{remains}} seconds'),
-  new Counter('stopwatch', 'Squats set 3'),
-];
+const kneePushUps: Exercise = {
+  name: 'Knee Push-Ups',
+  sets: [
+    new Counter('stopwatch', 'Knee push-ups set 1'),
+    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter('stopwatch', 'Knee push-ups set 2'),
+    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter('stopwatch', 'Knee push-ups set 3'),
+  ]
+};
 
-const gluteBridges = [
-  new Counter(15, 'Prepare for glute bridges'),
-  new Counter(50, 'Glute bridge for {{remains}} seconds'),
-  new Counter(50, 'Rest for {{remains}} seconds'),
-  new Counter(50, 'Glute bridge for {{remains}} seconds'),
-  new Counter(50, 'Rest for {{remains}} seconds'),
-  new Counter(50, 'Glute bridge for {{remains}} seconds'),
-];
+const squats: Exercise = {
+  name: 'Squats',
+  sets: [
+    new Counter('stopwatch', 'Squats set 1'),
+    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter('stopwatch', 'Squats set 2'),
+    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter('stopwatch', 'Squats set 3'),
+  ]
+};
 
-const ringRows = [
-  new Counter(15, 'Prepare for ring rows'),
-  new Counter('stopwatch', 'Ring rows set 1'),
-  new Counter(60, 'Rest for {{remains}} seconds'),
-  new Counter('stopwatch', 'Ring rows set 2'),
-  new Counter(60, 'Rest for {{remains}} seconds'),
-  new Counter('stopwatch', 'Ring rows set 3'),
-];
+const gluteBridges: Exercise = {
+  name: 'Glute Bridges',
+  sets: [
+    new Counter(50, 'Glute bridge for {{remains}} seconds'),
+    new Counter(50, 'Rest for {{remains}} seconds'),
+    new Counter(50, 'Glute bridge for {{remains}} seconds'),
+    new Counter(50, 'Rest for {{remains}} seconds'),
+    new Counter(50, 'Glute bridge for {{remains}} seconds'),
+  ]
+};
 
-const sidePlanks = [
-  new Counter(15, 'Prepare for side planks'),
-  new Counter(30, 'Side plank for {{remains}} seconds, set 1'),
-  new Counter(5, 'Switch sides'),
-  new Counter(30, 'Side plank for {{remains}} seconds, set 1'),
-  new Counter(30, 'Rest for {{remains}} seconds'),
-  new Counter(30, 'Side plank for {{remains}} seconds, set 2'),
-  new Counter(5, 'Switch sides'),
-  new Counter(30, 'Side plank for {{remains}} seconds, set 2'),
-  new Counter(30, 'Rest for {{remains}} seconds'),
-  new Counter(30, 'Side plank for {{remains}} seconds, set 3'),
-  new Counter(5, 'Switch sides'),
-  new Counter(30, 'Side plank for {{remains}} seconds, set 3'),
-];
+const ringRows: Exercise = {
+  name: 'Ring Rows',
+  sets: [
+    new Counter('stopwatch', 'Ring rows set 1'),
+    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter('stopwatch', 'Ring rows set 2'),
+    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter('stopwatch', 'Ring rows set 3'),
+  ]
+};
+
+const sidePlanks: Exercise = {
+  name: 'Side Planks',
+  sets: [
+    new Counter(30, 'Side plank for {{remains}} seconds, set 1'),
+    new Counter(5, 'Switch sides'),
+    new Counter(30, 'Side plank for {{remains}} seconds, set 1'),
+    new Counter(30, 'Rest for {{remains}} seconds'),
+    new Counter(30, 'Side plank for {{remains}} seconds, set 2'),
+    new Counter(5, 'Switch sides'),
+    new Counter(30, 'Side plank for {{remains}} seconds, set 2'),
+    new Counter(30, 'Rest for {{remains}} seconds'),
+    new Counter(30, 'Side plank for {{remains}} seconds, set 3'),
+    new Counter(5, 'Switch sides'),
+    new Counter(30, 'Side plank for {{remains}} seconds, set 3'),
+  ]
+};
 
 const createDailyRoutine = (
-  title: string, set1: TimelineElement[], set2: TimelineElement[]
+  title: string, ...exercises: Exercise[]
 ) => {
+  const elements: TimelineElement[] = [
+    new Counter(15, `Get ready for ${exercises[0].name}`),
+    ...exercises[0].sets,
+  ];
+
+  for (const exercise of exercises.slice(1)) {
+    elements.push(new Counter(60, `Rest for {{remains}} seconds and prepare for ${exercise.name}`));
+    elements.push(...exercise.sets);
+  }
+
   return new Timeline(
     title,
     [
       new Phrase(`Starting ${title} routine`),
-      ...set1,
-      new Counter(60, 'Rest for {{remains}} seconds and prepare for next exercise'),
-      ...set2,
+      ...elements,
       new Counter(60, 'Rest for {{remains}} seconds and prepare for front plank'),
       new Counter(40, 'Front plank for {{remains}} seconds'),
       new Counter(60, 'Rest for {{remains}} seconds and prepare for bar hang'),
