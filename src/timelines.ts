@@ -11,7 +11,7 @@ const kneePushUps: Exercise = {
     new Counter('stopwatch', 'Knee push-ups set 1'),
     new Counter(60, 'Rest for {{remains}} seconds'),
     new Counter('stopwatch', 'Knee push-ups set 2'),
-    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter(90, 'Rest for {{remains}} seconds'),
     new Counter('stopwatch', 'Knee push-ups set 3'),
   ]
 };
@@ -22,7 +22,7 @@ const squats: Exercise = {
     new Counter('stopwatch', 'Squats set 1'),
     new Counter(60, 'Rest for {{remains}} seconds'),
     new Counter('stopwatch', 'Squats set 2'),
-    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter(90, 'Rest for {{remains}} seconds'),
     new Counter('stopwatch', 'Squats set 3'),
   ]
 };
@@ -44,27 +44,29 @@ const ringRows: Exercise = {
     new Counter('stopwatch', 'Ring rows set 1'),
     new Counter(60, 'Rest for {{remains}} seconds'),
     new Counter('stopwatch', 'Ring rows set 2'),
-    new Counter(60, 'Rest for {{remains}} seconds'),
+    new Counter(90, 'Rest for {{remains}} seconds'),
     new Counter('stopwatch', 'Ring rows set 3'),
   ]
 };
 
-const sidePlanks: Exercise = {
+const createSidePlanks = (duration: number, rest: number): Exercise => ({
   name: 'Side Planks',
   sets: [
-    new Counter(30, 'Side plank for {{remains}} seconds, set 1'),
-    new Counter(5, 'Switch sides'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 1'),
-    new Counter(30, 'Rest for {{remains}} seconds'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 2'),
-    new Counter(5, 'Switch sides'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 2'),
-    new Counter(30, 'Rest for {{remains}} seconds'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 3'),
-    new Counter(5, 'Switch sides'),
-    new Counter(30, 'Side plank for {{remains}} seconds, set 3'),
+    new Counter(duration, 'Side plank for {{remains}} seconds, set 1'),
+    new Counter(8, 'Switch sides'),
+    new Counter(duration, 'Side plank for {{remains}} seconds, set 1'),
+    new Counter(rest, 'Rest for {{remains}} seconds'),
+    new Counter(duration, 'Side plank for {{remains}} seconds, set 2'),
+    new Counter(8, 'Switch sides'),
+    new Counter(duration, 'Side plank for {{remains}} seconds, set 2'),
+    new Counter(rest * 1.5, 'Rest for {{remains}} seconds'),
+    new Counter(duration, 'Side plank for {{remains}} seconds, set 3'),
+    new Counter(8, 'Switch sides'),
+    new Counter(duration, 'Side plank for {{remains}} seconds, set 3'),
   ]
-};
+});
+
+const sidePlanks = createSidePlanks(35, 30);
 
 const createDailyRoutine = (
   title: string, ...exercises: Exercise[]
@@ -85,9 +87,9 @@ const createDailyRoutine = (
       new Phrase(`Starting ${title} routine`),
       ...elements,
       new Counter(60, 'Rest for {{remains}} seconds and prepare for front plank'),
-      new Counter(40, 'Front plank for {{remains}} seconds'),
+      new Counter(45, 'Front plank for {{remains}} seconds'),
       new Counter(60, 'Rest for {{remains}} seconds and prepare for bar hang'),
-      new Counter(25, 'Bar hang for {{remains}} seconds'),
+      new Counter(30, 'Bar hang for {{remains}} seconds'),
       new Phrase(`Great job! You have completed the ${title} routine`),
     ]
   );
