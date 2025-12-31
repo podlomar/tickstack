@@ -81,14 +81,19 @@ const createDailyRoutine = (
     elements.push(...exercise.sets);
   }
 
+  const exerciseNames = exercises.map(e => e.name).join(' and ');
+
   return new Timeline(
     title,
+    exerciseNames,
     [
-      new Phrase(`Starting ${title} routine`),
+      new Phrase(`Starting ${title} routine with ${exerciseNames}`),
       ...elements,
       new Counter(60, 'Rest for {{remains}} seconds and prepare for front plank'),
-      new Counter(45, 'Front plank for {{remains}} seconds'),
-      new Counter(60, 'Rest for {{remains}} seconds and prepare for bar hang'),
+      new Counter(50, 'Front plank for {{remains}} seconds'),
+      new Counter(60, 'Rest for {{remains}} seconds and prepare for ring hold'),
+      new Counter(20, 'Ring hold for {{remains}} seconds'),
+      new Counter(30, 'Rest for {{remains}} seconds and prepare for bar hang'),
       new Counter(30, 'Bar hang for {{remains}} seconds'),
       new Phrase(`Great job! You have completed the ${title} routine`),
     ]
@@ -96,7 +101,7 @@ const createDailyRoutine = (
 };
 
 export const timelines = [
-  new Timeline('Pre-run lower back warmup', [
+  new Timeline('Pre-run', 'Lower back warmup', [
     new Phrase('Starting pre-run lower back warmup routine'),
     new Counter(20, 'Prepare for cat-cow stretch'),
     new Counter(60, 'Cat-cow stretch for {{remains}} seconds'),
@@ -114,7 +119,7 @@ export const timelines = [
     new Counter(15, 'Switch directions'),
     new Phrase('Great! You are ready for your run!'),
   ]),
-  new Timeline('Long Stretching Routine', [
+  new Timeline('Long Stretching', 'Full lower body routine', [
     new Counter(10, 'Prepare for quads stretch'),
     new Counter(30, 'Quads stretch for {{remains}} seconds'),
     new Counter(5, 'Switch legs'),
@@ -165,7 +170,7 @@ export const timelines = [
     new Counter(20, 'Get ready for meditation'),
     new Counter(60 * 7, 'Meditation time for 7 minutes! Relax and breathe deeply', 'Congratulations! You have completed the long morning stretching routine!'),
   ]),
-  new Timeline('Short Stretching Routine', [
+  new Timeline('Short Stretching', 'Lower body routine', [
     new Counter(10, 'Prepare for calf stretch'),
     new Counter(30, 'Calf stretch for {{remains}} seconds'),
     new Counter(3, 'Switch legs'),
@@ -201,4 +206,15 @@ export const timelines = [
   createDailyRoutine('Thursday Workout', kneePushUps, sidePlanks),
   createDailyRoutine('Friday Workout', squats, ringRows),
   createDailyRoutine('Saturday Workout', kneePushUps, gluteBridges),
+  new Timeline('Short Workout Routine', 'Quick full body workout', [
+    new Counter(15, 'Prepare for squats'),
+    new Counter('stopwatch', 'Squats set'),
+    new Counter(60, 'Rest for {{remains}} seconds and prepare for knee push-ups'),
+    new Counter('stopwatch', 'Knee push-ups set'),
+    new Counter(60, 'Rest for {{remains}} seconds and prepare for front plank'),
+    new Counter(45, 'Front plank for {{remains}} seconds'),
+    new Counter(60, 'Rest for {{remains}} seconds and prepare for bar hang'),
+    new Counter(30, 'Bar hang for {{remains}} seconds'),
+    new Phrase('Great job! You have completed the short workout routine!'),
+  ]),
 ];

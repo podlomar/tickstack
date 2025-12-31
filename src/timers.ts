@@ -166,14 +166,18 @@ export class Phrase implements TimelineElement {
 
 export class Timeline {
   private title: string;
+  private subtitle: string;
   private elements: TimelineElement[] = [];
   private currentIndex: number = 0;
   private totalDuration: number = 0;
   private stateCallback: (state: TimerState) => void = () => { };
   private wakeLock: WakeLockSentinel | null = null;
 
-  public constructor(title: string, elements: TimelineElement[]) {
+  public constructor(
+    title: string, subtitle: string, elements: TimelineElement[]
+  ) {
     this.title = title;
+    this.subtitle = subtitle;
     this.elements = elements;
     this.totalDuration = elements.reduce((sum, element) => {
       const duration = element.getDuration();
@@ -216,6 +220,10 @@ export class Timeline {
 
   public getTitle(): string {
     return this.title;
+  }
+
+  public getSubtitle(): string {
+    return this.subtitle;
   }
 
   public getTotalDuration(): number {

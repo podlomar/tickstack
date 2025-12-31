@@ -49,7 +49,8 @@ export const App = ({ timelines }: Props) => {
               setCurrentTimeline(timeline);
             }}
           >
-            {timeline.getTitle()}
+            <div className="timeline-title">{timeline.getTitle()}</div>
+            <div className="timeline-subtitle">{timeline.getSubtitle()}</div>
           </button>
         ))}
       </div>
