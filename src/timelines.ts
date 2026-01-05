@@ -1,4 +1,4 @@
-import { Counter, Phrase, Timeline, TimelineElement } from './timers';
+import { Counter, Phrase, Sound, Timeline, TimelineElement } from './timers';
 
 interface Exercise {
   name: string;
@@ -90,7 +90,7 @@ const createDailyRoutine = (
       new Phrase(`Starting ${title} routine with ${exerciseNames}`),
       ...elements,
       new Counter(60, 'Rest for {{remains}} seconds and prepare for front plank'),
-      new Counter(50, 'Front plank for {{remains}} seconds'),
+      new Counter(55, 'Front plank for {{remains}} seconds'),
       new Counter(60, 'Rest for {{remains}} seconds and prepare for ring hold'),
       new Counter(20, 'Ring hold for {{remains}} seconds'),
       new Counter(30, 'Rest for {{remains}} seconds and prepare for bar hang'),
@@ -216,5 +216,16 @@ export const timelines = [
     new Counter(60, 'Rest for {{remains}} seconds and prepare for bar hang'),
     new Counter(30, 'Bar hang for {{remains}} seconds'),
     new Phrase('Great job! You have completed the short workout routine!'),
+  ]),
+  new Timeline('Meditation', 'Quick mindfulness session', [
+    new Counter(10, 'Get ready for meditation'),
+    new Sound('/sounds/ding.mp3'),
+    new Counter(60 * 5),
+    new Sound('/sounds/ding.mp3'),
+    new Counter(60 * 5),
+    new Sound('/sounds/ding.mp3'),
+    new Counter(60 * 5),
+    new Sound('/sounds/ding.mp3'),
+    new Phrase('Well done! You have completed your meditation session.'),
   ]),
 ];

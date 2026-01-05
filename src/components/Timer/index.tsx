@@ -18,7 +18,7 @@ const computeDash = (state: TimerState | null): Dash => {
     return { dashArray: totalLength, dashOffset: totalLength };
   }
 
-  if (state.type === 'speech') {
+  if (state.type === 'speech' || state.type === 'sound') {
     return { dashArray: totalLength, dashOffset: totalLength };
   }
 
@@ -40,7 +40,7 @@ const buildText = (state: TimerState | null): string => {
     return '';
   }
 
-  if (state.type === 'speech') {
+  if (state.type === 'speech' || state.type === 'sound') {
     return '...';
   }
 

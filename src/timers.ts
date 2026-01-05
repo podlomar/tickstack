@@ -8,7 +8,7 @@ const template = (str: string, args: { [key: string]: any }) => {
 export interface CountdownState {
   type: 'countdown';
   running: boolean;
-  text: string;
+  text?: string;
   remaining: number;
   progressRatio: number;
 }
@@ -16,17 +16,23 @@ export interface CountdownState {
 export interface StopwatchState {
   type: 'stopwatch';
   running: boolean;
-  text: string;
+  text?: string;
   elapsed: number;
 }
 
 export interface SpeechState {
   type: 'speech';
   running: boolean;
-  text: string;
+  text?: string;
 }
 
-export type TimerState = CountdownState | StopwatchState | SpeechState;
+export interface SoundState {
+  type: 'sound';
+  running: boolean;
+  text?: string;
+}
+
+export type TimerState = CountdownState | StopwatchState | SpeechState | SoundState;
 
 type Duration = number | 'stopwatch';
 
@@ -39,14 +45,14 @@ export interface TimelineElement {
 
 export class Counter implements TimelineElement {
   private duration: Duration;
-  private startPhrase: string;
+  private startPhrase?: string;
   private endPhrase?: string;
   private timer: Timer;
   private stateCallback: (state: TimerState) => void = () => { };
 
   public constructor(
     duration: Duration,
-    startPhrase: string,
+    startPhrase?: string,
     endPhrase?: string,
   ) {
     this.duration = duration;
@@ -61,7 +67,7 @@ export class Counter implements TimelineElement {
   }
 
   public async run(): Promise<void> {
-    const phrase = template(this.startPhrase, { remains: this.duration });
+    const phrase = this.startPhrase === undefined ? undefined : template(this.startPhrase, { remains: this.duration });
 
     this.stateCallback({
       type: 'speech',
@@ -69,15 +75,19 @@ export class Counter implements TimelineElement {
       text: phrase,
     });
 
-    const utterStart = new SpeechSynthesisUtterance(phrase);
-    window.speechSynthesis.speak(utterStart);
+    if (phrase !== undefined) {
+      const utterStart = new SpeechSynthesisUtterance(phrase);
+      window.speechSynthesis.speak(utterStart);
 
-    return new Promise((resolve) => {
-      utterStart.onend = async () => {
-        await this.timer.run();
-        resolve();
-      };
-    });
+      return new Promise((resolve) => {
+        utterStart.onend = async () => {
+          await this.timer.run();
+          resolve();
+        };
+      });
+    }
+
+    await this.timer.run();
   }
 
   public stop(): void {
@@ -111,7 +121,7 @@ export class Counter implements TimelineElement {
       this.stateCallback({
         type: 'countdown',
         running: true,
-        text: template(this.startPhrase, { remains: Math.ceil(remaining) }),
+        text: this.startPhrase === undefined ? undefined : template(this.startPhrase, { remains: Math.ceil(remaining) }),
         remaining,
         progressRatio: Math.min(ratio, 1),
       });
@@ -157,6 +167,43 @@ export class Phrase implements TimelineElement {
 
   public stop(): void {
     window.speechSynthesis.cancel();
+  }
+
+  public getDuration(): Duration {
+    return 0;
+  }
+}
+
+export class Sound implements TimelineElement {
+  private audio: HTMLAudioElement;
+  private stateCallback: (state: TimerState) => void = () => { };
+
+  public constructor(audioSrc: string) {
+    this.audio = new Audio(audioSrc);
+  }
+
+  public onStateChange(callback: (state: TimerState) => void): void {
+    this.stateCallback = callback;
+  }
+
+  public async run(): Promise<void> {
+    this.stateCallback({
+      type: 'sound',
+      running: true,
+      text: `Playing sound`,
+    });
+
+    return new Promise((resolve) => {
+      this.audio.onended = () => {
+        resolve();
+      };
+      this.audio.play();
+    });
+  }
+
+  public stop(): void {
+    this.audio.pause();
+    this.audio.currentTime = 0;
   }
 
   public getDuration(): Duration {
