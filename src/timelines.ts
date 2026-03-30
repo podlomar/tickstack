@@ -5,48 +5,39 @@ interface Exercise {
   sets: TimelineElement[];
 }
 
-const kneePushUps: Exercise = {
-  name: 'Knee Push-Ups',
+const create3setsExercise = (name: string): Exercise => ({
+  name,
   sets: [
-    new Counter('stopwatch', 'Knee push-ups set 1'),
+    new Counter('stopwatch', `${name} set 1`),
     new Counter(60, 'Rest for {{remains}} seconds'),
-    new Counter('stopwatch', 'Knee push-ups set 2'),
+    new Counter('stopwatch', `${name} set 2`),
     new Counter(90, 'Rest for {{remains}} seconds'),
-    new Counter('stopwatch', 'Knee push-ups set 3'),
+    new Counter('stopwatch', `${name} set 3`),
   ]
-};
+});
 
-const squats: Exercise = {
-  name: 'Squats',
-  sets: [
-    new Counter('stopwatch', 'Squats set 1'),
-    new Counter(60, 'Rest for {{remains}} seconds'),
-    new Counter('stopwatch', 'Squats set 2'),
-    new Counter(90, 'Rest for {{remains}} seconds'),
-    new Counter('stopwatch', 'Squats set 3'),
-  ]
-};
+const kneePushUps = create3setsExercise('Knee Push-Ups');
+const squats = create3setsExercise('Squats');
+const ringRows = create3setsExercise('Ring Rows');
+const bicepCurls = create3setsExercise('Bicep Curls');
+const reverseLunges = create3setsExercise('Reverse Lunges');
 
 const gluteBridges: Exercise = {
   name: 'Glute Bridges',
   sets: [
-    new Counter(50, 'Glute bridge for {{remains}} seconds'),
-    new Counter(50, 'Rest for {{remains}} seconds'),
-    new Counter(50, 'Glute bridge for {{remains}} seconds'),
-    new Counter(50, 'Rest for {{remains}} seconds'),
-    new Counter(50, 'Glute bridge for {{remains}} seconds'),
-  ]
+    new Counter(55, 'Glute bridge for {{remains}} seconds'),
+    new Counter(55, 'Rest for {{remains}} seconds'),
+    new Counter(55, 'Glute bridge for {{remains}} seconds'),
+    new Counter(55, 'Rest for {{remains}} seconds'),
+    new Counter(55, 'Glute bridge for {{remains}} seconds'),
+  ],
 };
 
-const ringRows: Exercise = {
-  name: 'Ring Rows',
+const pikeHold: Exercise = {
+  name: 'Pike Hold',
   sets: [
-    new Counter('stopwatch', 'Ring rows set 1'),
-    new Counter(60, 'Rest for {{remains}} seconds'),
-    new Counter('stopwatch', 'Ring rows set 2'),
-    new Counter(90, 'Rest for {{remains}} seconds'),
-    new Counter('stopwatch', 'Ring rows set 3'),
-  ]
+    new Counter(60, 'Pike hold for {{remains}} seconds'),
+  ],
 };
 
 const createSidePlanks = (duration: number, rest: number): Exercise => ({
@@ -66,10 +57,10 @@ const createSidePlanks = (duration: number, rest: number): Exercise => ({
   ]
 });
 
-const sidePlanks = createSidePlanks(35, 30);
+const sidePlanks = createSidePlanks(40, 40);
 
 const createDailyRoutine = (
-  title: string, ...exercises: Exercise[]
+  title: string, day: 'odd' | 'even', ...exercises: Exercise[]
 ) => {
   const elements: TimelineElement[] = [
     new Counter(15, `Get ready for ${exercises[0].name}`),
@@ -81,7 +72,24 @@ const createDailyRoutine = (
     elements.push(...exercise.sets);
   }
 
-  const exerciseNames = exercises.map(e => e.name).join(' and ');
+  const exerciseNames = exercises.slice(0, -1).map(e => e.name).join(', ') + ' and ' + exercises.at(-1)!.name;
+
+  const stableExercises = day === 'odd'
+    ? [
+      new Counter(60, 'Rest for {{remains}} seconds and prepare for front plank'),
+      new Counter(60, 'Front plank for {{remains}} seconds'),
+      new Counter(60, 'Rest for {{remains}} seconds and prepare for ring hold'),
+      new Counter(20, 'Ring support for {{remains}} seconds'),
+      new Counter(30, 'Rest for {{remains}} seconds and prepare for bar hang'),
+      new Counter(35, 'Passive bar hang for {{remains}} seconds'),
+    ] : [
+      new Counter(60, 'Rest for {{remains}} seconds and prepare for front plank'),
+      new Counter(60, 'Hollow body hold for {{remains}} seconds'),
+      new Counter(60, 'Rest for {{remains}} seconds and prepare for ring hold'),
+      new Counter(20, 'Ring support for {{remains}} seconds'),
+      new Counter(30, 'Rest for {{remains}} seconds and prepare for bar hang'),
+      new Counter(35, 'Active bar hang for {{remains}} seconds'),
+    ];
 
   return new Timeline(
     title,
@@ -89,12 +97,7 @@ const createDailyRoutine = (
     [
       new Phrase(`Starting ${title} routine with ${exerciseNames}`),
       ...elements,
-      new Counter(60, 'Rest for {{remains}} seconds and prepare for front plank'),
-      new Counter(55, 'Front plank for {{remains}} seconds'),
-      new Counter(60, 'Rest for {{remains}} seconds and prepare for ring hold'),
-      new Counter(20, 'Ring hold for {{remains}} seconds'),
-      new Counter(30, 'Rest for {{remains}} seconds and prepare for bar hang'),
-      new Counter(30, 'Bar hang for {{remains}} seconds'),
+      ...stableExercises,
       new Phrase(`Great job! You have completed the ${title} routine`),
     ]
   );
@@ -200,12 +203,12 @@ export const timelines = [
     new Counter(20, 'Get ready for meditation'),
     new Counter(60 * 4, 'Meditation time for 4 minutes! Relax and breathe deeply', 'Congratulations! You have completed the short morning  stretching routine!'),
   ]),
-  createDailyRoutine('Monday Workout', squats, kneePushUps),
-  createDailyRoutine('Tuesday Workout', ringRows, sidePlanks),
-  createDailyRoutine('Wednesday Workout', squats, gluteBridges),
-  createDailyRoutine('Thursday Workout', kneePushUps, sidePlanks),
-  createDailyRoutine('Friday Workout', squats, ringRows),
-  createDailyRoutine('Saturday Workout', kneePushUps, gluteBridges),
+  createDailyRoutine('Monday Workout', 'odd', squats, kneePushUps, reverseLunges),
+  createDailyRoutine('Tuesday Workout', 'even', ringRows, sidePlanks, pikeHold),
+  createDailyRoutine('Wednesday Workout', 'odd', squats, gluteBridges, bicepCurls),
+  createDailyRoutine('Thursday Workout', 'even', kneePushUps, sidePlanks, reverseLunges),
+  createDailyRoutine('Friday Workout', 'odd', squats, ringRows, pikeHold),
+  createDailyRoutine('Saturday Workout', 'even', kneePushUps, gluteBridges, bicepCurls),
   new Timeline('Short Workout Routine', 'Quick full body workout', [
     new Counter(15, 'Prepare for squats'),
     new Counter('stopwatch', 'Squats set'),
