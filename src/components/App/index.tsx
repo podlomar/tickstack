@@ -15,9 +15,24 @@ export const App = ({ timelines }: Props) => {
       setTimerState(state);
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+      }
+    };
+
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
+        e.preventDefault();
         currentTimeline?.next();
+      } else if (e.code === 'NumpadEnter' || e.code === 'Enter') {
+        console.log('Toggling pause/resume');
+        console.log('Current timer state:', timerState);
+        if (currentTimeline?.running()) {
+          currentTimeline?.pause();
+        } else {
+          currentTimeline?.resume();
+        }
       }
     };
 
@@ -26,10 +41,12 @@ export const App = ({ timelines }: Props) => {
       currentTimeline.run();
     }
 
+    window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
     return () => {
       currentTimeline?.onStateChange(() => { });
+      window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, [currentTimeline]);
