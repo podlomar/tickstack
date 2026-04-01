@@ -103,6 +103,37 @@ const createDailyRoutine = (
   );
 };
 
+const exerciseToTimeline = (exercise: Exercise): Timeline =>
+  new Timeline(exercise.name, 'Individual exercise', [
+    new Counter(20, `Get ready for ${exercise.name}`),
+    ...exercise.sets,
+    new Phrase(`${exercise.name} complete!`),
+  ]);
+
+export const exercises = [
+  squats,
+  kneePushUps,
+  ringRows,
+  bicepCurls,
+  reverseLunges,
+  gluteBridges,
+  pikeHold,
+  sidePlanks,
+].map(exerciseToTimeline);
+
+const makeTimer = (seconds: number): Timeline => {
+  const label = seconds < 60
+    ? `${seconds}s`
+    : seconds % 60 === 0
+      ? `${seconds / 60} min`
+      : `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+  return new Timeline(label, 'Countdown timer', [
+    new Counter(seconds, '{{remains}} seconds remaining'),
+  ]);
+};
+
+export const timers = [60, 90, 120, 180, 300, 600, 900].map(makeTimer);
+
 export const timelines = [
   new Timeline('Pre-run', 'Lower back warmup', [
     new Phrase('Starting pre-run lower back warmup routine'),

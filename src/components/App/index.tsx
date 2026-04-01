@@ -4,9 +4,11 @@ import { Timer } from "../Timer";
 
 interface Props {
   timelines: Timeline[];
+  exercises: Timeline[];
+  timers: Timeline[];
 }
 
-export const App = ({ timelines }: Props) => {
+export const App = ({ timelines, exercises, timers }: Props) => {
   const [currentTimeline, setCurrentTimeline] = useState<Timeline | null>(null);
   const [timerState, setTimerState] = useState<TimerState | null>(null);
 
@@ -68,6 +70,32 @@ export const App = ({ timelines }: Props) => {
           >
             <div className="timeline-title">{timeline.getTitle()}</div>
             <div className="timeline-subtitle">{timeline.getSubtitle()}</div>
+          </button>
+        ))}
+      </div>
+      <h2>Timers</h2>
+      <div id="timers">
+        {timers.map((timer) => (
+          <button
+            key={timer.getTitle()}
+            onClick={() => {
+              setCurrentTimeline(timer);
+            }}
+          >
+            <div className="timeline-title">{timer.getTitle()}</div>
+          </button>
+        ))}
+      </div>
+      <h2>Individual Exercises</h2>
+      <div id="exercises">
+        {exercises.map((exercise) => (
+          <button
+            key={exercise.getTitle()}
+            onClick={() => {
+              setCurrentTimeline(exercise);
+            }}
+          >
+            <div className="timeline-title">{exercise.getTitle()}</div>
           </button>
         ))}
       </div>
