@@ -39,6 +39,8 @@ type Duration = number | 'stopwatch';
 export interface TimelineElement {
   run(): Promise<void>;
   stop(): void;
+  pause(): void;
+  resume(): void;
   getDuration(): Duration;
   onStateChange(callback: (state: TimerState) => void): void;
 }
@@ -57,7 +59,7 @@ export class Counter implements TimelineElement {
   ) {
     this.duration = duration;
     this.timer = new Timer();
-    this.timer.onTick = this.handleTick.bind(this);
+    this.timer.onTick = (elapsed, paused) => this.handleTick(elapsed, paused);
     this.startPhrase = startPhrase;
     this.endPhrase = endPhrase;
   }
@@ -103,15 +105,23 @@ export class Counter implements TimelineElement {
     }
   }
 
+  public pause(): void {
+    this.timer.pause();
+  }
+
+  public resume(): void {
+    this.timer.resume();
+  }
+
   public getDuration(): Duration {
     return this.duration;
   }
 
-  private handleTick(elapsed: number): void {
+  private handleTick(elapsed: number, paused: boolean): void {
     if (this.duration === 'stopwatch') {
       this.stateCallback({
         type: 'stopwatch',
-        running: false,
+        running: !paused,
         text: this.startPhrase,
         elapsed,
       });
@@ -120,7 +130,7 @@ export class Counter implements TimelineElement {
       const ratio = elapsed / this.duration;
       this.stateCallback({
         type: 'countdown',
-        running: true,
+        running: !paused,
         text: this.startPhrase === undefined ? undefined : template(this.startPhrase, { remains: Math.ceil(remaining) }),
         remaining,
         progressRatio: Math.min(ratio, 1),
@@ -136,6 +146,7 @@ export class Counter implements TimelineElement {
 export class Phrase implements TimelineElement {
   private phrase: string;
   private stateCallback: (state: TimerState) => void = () => { };
+  private paused: boolean = false;
 
   public constructor(phrase: string) {
     this.phrase = phrase;
@@ -146,6 +157,7 @@ export class Phrase implements TimelineElement {
   }
 
   public async run(): Promise<void> {
+    this.paused = false;
     this.stateCallback({
       type: 'speech',
       running: true,
@@ -167,6 +179,26 @@ export class Phrase implements TimelineElement {
 
   public stop(): void {
     window.speechSynthesis.cancel();
+  }
+
+  public pause(): void {
+    this.paused = true;
+    window.speechSynthesis.pause();
+    this.stateCallback({
+      type: 'speech',
+      running: false,
+      text: this.phrase,
+    });
+  }
+
+  public resume(): void {
+    this.paused = false;
+    window.speechSynthesis.resume();
+    this.stateCallback({
+      type: 'speech',
+      running: true,
+      text: this.phrase,
+    });
   }
 
   public getDuration(): Duration {
@@ -206,6 +238,24 @@ export class Sound implements TimelineElement {
     this.audio.currentTime = 0;
   }
 
+  public pause(): void {
+    this.audio.pause();
+    this.stateCallback({
+      type: 'sound',
+      running: false,
+      text: `Playing sound`,
+    });
+  }
+
+  public resume(): void {
+    this.audio.play();
+    this.stateCallback({
+      type: 'sound',
+      running: true,
+      text: `Playing sound`,
+    });
+  }
+
   public getDuration(): Duration {
     return 0;
   }
@@ -219,6 +269,8 @@ export class Timeline {
   private totalDuration: number = 0;
   private stateCallback: (state: TimerState) => void = () => { };
   private wakeLock: WakeLockSentinel | null = null;
+  private _running: boolean = false;
+  private _paused: boolean = false;
 
   public constructor(
     title: string, subtitle: string, elements: TimelineElement[]
@@ -239,6 +291,8 @@ export class Timeline {
   public async run(): Promise<void> {
     await this.requestWakeLock();
 
+    this._running = true;
+    this._paused = false;
     this.currentIndex = 0;
     while (this.currentIndex < this.elements.length) {
       const element = this.elements[this.currentIndex];
@@ -247,6 +301,7 @@ export class Timeline {
       this.currentIndex++;
     }
 
+    this._running = false;
     this.releaseWakeLock();
   }
 
@@ -282,25 +337,53 @@ export class Timeline {
       this.elements[this.currentIndex].stop();
     }
   }
+
+  public pause(): void {
+    if (this.currentIndex < this.elements.length) {
+      this._paused = true;
+      this.elements[this.currentIndex].pause();
+    }
+  }
+
+  public resume(): void {
+    if (this.currentIndex < this.elements.length) {
+      this._paused = false;
+      this.elements[this.currentIndex].resume();
+    }
+  }
+
+  public running(): boolean {
+    return this._running && !this._paused;
+  }
 }
 
 export class Timer {
-  public onTick: (remaining: number) => void = () => { };
+  public onTick: (elapsed: number, paused: boolean) => void = () => { };
   private resolve: (() => void) | null = null;
+  private intervalId: number | null = null;
+  private elapsed: number = 0;
+  private paused: boolean = false;
+
   public constructor() { }
 
   public async run(): Promise<void> {
     return new Promise((resolve) => {
-      let elapsed = 0;
-      this.onTick(elapsed);
+      this.elapsed = 0;
+      this.paused = false;
+      this.onTick(this.elapsed, this.paused);
 
-      const intervalId = window.setInterval(() => {
-        elapsed++;
-        this.onTick(elapsed);
+      this.intervalId = window.setInterval(() => {
+        if (!this.paused) {
+          this.elapsed++;
+        }
+        this.onTick(this.elapsed, this.paused);
       }, 1000);
 
       this.resolve = () => {
-        window.clearInterval(intervalId);
+        if (this.intervalId !== null) {
+          window.clearInterval(this.intervalId);
+          this.intervalId = null;
+        }
         this.resolve = null;
         resolve();
       };
@@ -310,4 +393,14 @@ export class Timer {
   public stop(): void {
     this.resolve?.();
   }
-};
+
+  public pause(): void {
+    this.paused = true;
+    this.onTick(this.elapsed, this.paused);
+  }
+
+  public resume(): void {
+    this.paused = false;
+    this.onTick(this.elapsed, this.paused);
+  }
+}
